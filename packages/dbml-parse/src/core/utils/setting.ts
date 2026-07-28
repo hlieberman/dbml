@@ -23,6 +23,14 @@ export function addSettingEdit (declaration: SyntaxNode, setting: string): TextE
     }
   }
 
+  if (declaration instanceof ElementDeclarationNode) {
+    const settingsList = declaration.attributeList;
+    if (settingsList) {
+      const insertOffset = settingsList.end - 1;
+      return { start: insertOffset, end: insertOffset, newText: `, ${setting}` };
+    }
+  }
+
   return { start: declaration.end, end: declaration.end, newText: ` [${setting}]` };
 }
 

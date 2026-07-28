@@ -1,7 +1,9 @@
 import {
   describe, expect, test,
 } from 'vitest';
-import { interpret } from '@tests/utils';
+import { interpret, parse } from '@tests/utils';
+import { ElementDeclarationNode } from '@/core/types/nodes';
+import { addSettingEdit } from '@/core/utils/setting';
 
 function getQuickFixes (source: string) {
   const result = interpret(source);
@@ -260,5 +262,31 @@ describe('[example] code actions - ref constraint quick fixes', () => {
       // No column fixes for partial columns, no op token to change
       expect(fixes.filter((f) => f.title.includes('NOT NULL'))).toHaveLength(0);
     });
+  });
+});
+
+describe('[example] addSettingEdit on ElementDeclarationNode', () => {
+  test('inserts into existing settings block', () => {
+    const source = 'Table users [headercolor: #fff] {}';
+    const ast = parse(source).getValue()!.ast;
+    const tableNode = ast.body.find((n): n is ElementDeclarationNode => n instanceof ElementDeclarationNode)!;
+    expect(tableNode.attributeList).toBeDefined();
+
+    const edit = addSettingEdit(tableNode, 'note: "test"');
+    expect(edit).toBeDefined();
+    expect(edit!.newText).toBe(', note: "test"');
+    // Should insert before the closing ]
+    expect(source[edit!.start]).toBe(']');
+  });
+
+  test('appends new settings block when none exists', () => {
+    const source = 'Table users {}';
+    const ast = parse(source).getValue()!.ast;
+    const tableNode = ast.body.find((n): n is ElementDeclarationNode => n instanceof ElementDeclarationNode)!;
+    expect(tableNode.attributeList).toBeUndefined();
+
+    const edit = addSettingEdit(tableNode, 'headercolor: #fff');
+    expect(edit).toBeDefined();
+    expect(edit!.newText).toBe(' [headercolor: #fff]');
   });
 });
