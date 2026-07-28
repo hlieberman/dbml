@@ -46,7 +46,8 @@ export default class DBMLCodeActionProvider implements CodeActionProvider {
           || range.endColumn !== marker.endColumn) continue;
 
         for (const fix of hint.quickFixes ?? []) {
-          actions.push(this.quickFixToCodeAction(fix, model, marker));
+          const action = this.quickFixToCodeAction(fix, model, marker);
+          if (action) actions.push(action);
         }
       }
     }
@@ -61,7 +62,13 @@ export default class DBMLCodeActionProvider implements CodeActionProvider {
   }
 
   // Convert a QuickFix (offset-based) to a Monaco CodeAction (line/column-based).
-  private quickFixToCodeAction (fix: QuickFix, model: TextModel, marker: MarkerData): CodeAction {
+  // Returns undefined for cross-file fixes (offsets can't be resolved against the current model).
+  private quickFixToCodeAction (fix: QuickFix, model: TextModel, marker: MarkerData): CodeAction | undefined {
+    const filepath = Filepath.fromUri(String(model.uri));
+
+    // Filter fixes to current file
+    if (!fix.filepath.equals(filepath)) return undefined;
+
     const resource = Uri.parse(fix.filepath.toUri({ protocol: model.uri.scheme }));
     const edit: WorkspaceEdit = {
       edits: fix.edits.map((e) => {
