@@ -97,8 +97,8 @@ function validateForeignKey (
   const { min: min2, max: max2 } = parseCardinality(rawEndpoint2.relation);
   const isOneToOne = max1 !== '*' && max2 !== '*';
 
-  // Skip validation for the one side, or the left side of a 1-1
-  const skipTable1 = (max1 === 1 || isOneToOne) && min2 === 0;
+  // Skip the one side when the other side is optional, or always skip the left side of a 1-1
+  const skipTable1 = (max1 === 1 && min2 === 0) || isOneToOne;
   const skipTable2 = max2 === 1 && min1 === 0;
 
   return [
