@@ -71,7 +71,7 @@ export function validateCardinality (
   if (ownCard.min >= 1 && otherIsSource) {
     const allOtherNullable = otherColumns.length > 0 && otherColumns.every((col) => col.nullable(compiler));
     if (allOtherNullable) {
-      const qnames = otherColumns.map((c) => c.qualifiedName(compiler)).join(', ');
+      const qnames = otherColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
       const msg = otherColumns.length === 1
         ? `Column '${qnames}' is nullable but operator '${op}' requires it to be NOT NULL`
         : `Columns (${qnames}) are all nullable but operator '${op}' requires at least one to be NOT NULL`;
@@ -93,7 +93,7 @@ export function validateCardinality (
   if (ownCard.min === 0 && otherIsSource) {
     const allOtherNotNull = otherColumns.length > 0 && otherColumns.every((col) => col.nullable(compiler) === false);
     if (allOtherNotNull) {
-      const qnames = otherColumns.map((c) => c.qualifiedName(compiler)).join(', ');
+      const qnames = otherColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
       const msg = otherColumns.length === 1
         ? `Column '${qnames}' is NOT NULL but operator '${op}' allows it to be optional`
         : `Columns (${qnames}) are NOT NULL but operator '${op}' allows them to be optional`;
@@ -115,7 +115,7 @@ export function validateCardinality (
 
   // card.max === *: if ownColumns are unique/pk, max should be 1.
   if (ownCard.max === '*' && isColumnsUnique(compiler, ownColumns)) {
-    const qnames = ownColumns.map((c) => c.qualifiedName(compiler)).join(', ');
+    const qnames = ownColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
     const msg = ownColumns.length === 1
       ? `Column '${qnames}' is unique but operator '${op}' allows many`
       : `Columns (${qnames}) have a unique index but operator '${op}' allows many`;
@@ -133,7 +133,7 @@ export function validateCardinality (
 
   // card.max === 1: ownColumns should be unique/pk.
   if (ownCard.max === 1 && !isColumnsUnique(compiler, ownColumns)) {
-    const qnames = ownColumns.map((c) => c.qualifiedName(compiler)).join(', ');
+    const qnames = ownColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
     const msg = ownColumns.length === 1
       ? `Column '${qnames}' should be unique or primary key for operator '${op}'`
       : `Columns (${qnames}) should have a composite unique index for operator '${op}'`;
@@ -186,7 +186,7 @@ function suggestMakeNotNull (col: ColumnSymbol, compiler: Compiler): QuickFix | 
 
   const source = compiler.getSource(col.declaration.filepath);
   if (!source) return undefined;
-  const qname = col.qualifiedName(compiler);
+  const qname = col.qualifiedName(compiler).join('.');
 
   const removeNull = removeSettingEdit(col.declaration, 'null', source);
   if (removeNull) {
@@ -214,7 +214,7 @@ function suggestMakeNullable (col: ColumnSymbol, compiler: Compiler): QuickFix |
 
   const edit = removeSettingEdit(col.declaration, 'not null', source);
   if (!edit) return undefined;
-  return { title: `Mark '${col.qualifiedName(compiler)}' as NULL`,
+  return { title: `Mark '${col.qualifiedName(compiler).join('.')}' as NULL`,
     filepath: col.declaration.filepath,
     edits: [
       edit,
@@ -262,7 +262,7 @@ function suggestMakeUnique (col: ColumnSymbol, compiler: Compiler): QuickFix | u
 
   const edit = addSettingEdit(col.declaration, 'unique');
   if (!edit) return undefined;
-  return { title: `Mark '${col.qualifiedName(compiler)}' as UNIQUE`,
+  return { title: `Mark '${col.qualifiedName(compiler).join('.')}' as UNIQUE`,
     filepath: col.declaration.filepath,
     edits: [
       edit,

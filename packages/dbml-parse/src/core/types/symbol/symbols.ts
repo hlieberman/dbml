@@ -492,14 +492,28 @@ export class ColumnSymbol extends NodeSymbol {
     return this;
   }
 
-  qualifiedName (compiler: Compiler): string {
+  qualifiedName (compiler: Compiler): string[] {
+    const colName = this.name ?? '';
     const tableNode = this.declaration?.parentOfKind(ElementDeclarationNode);
-    if (!tableNode) return this.name ?? '';
+    if (!tableNode) return [
+      colName,
+    ];
     const tableSymbol = compiler.nodeSymbol(tableNode).getFiltered(UNHANDLED) as TableSymbol | undefined;
-    if (!tableSymbol) return this.name ?? '';
+    if (!tableSymbol) return [
+      colName,
+    ];
 
     const { schema, name } = tableSymbol.interpretedName(compiler, this.filepath);
-    return schema ? `${schema}.${name}.${this.name}` : `${name}.${this.name}`;
+    return schema
+      ? [
+          schema,
+          name,
+          colName,
+        ]
+      : [
+          name,
+          colName,
+        ];
   }
 
   pk (compiler: Compiler): boolean {
