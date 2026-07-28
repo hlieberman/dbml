@@ -86,7 +86,7 @@ export function isValidPartialInjection (
 }
 
 export function isRelationshipOp (op?: string): boolean {
-  return op !== undefined && (RELATIONSHIP_OPS as Set<string>).has(op);
+  return op !== undefined && (RELATIONSHIP_OPS as ReadonlyMap<string, unknown>).has(op);
 }
 
 export function isValidColor (value?: SyntaxNode): boolean {
