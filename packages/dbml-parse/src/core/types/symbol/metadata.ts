@@ -309,16 +309,6 @@ export class PartialRefMetadata extends NodeMetadata {
     return op ? getMultiplicities(op) : undefined;
   }
 
-  leftCardinality (compiler: Compiler): { min: number; max: number | '*' } | undefined {
-    const c = this.cardinalities(compiler);
-    return c ? parseCardinality(c[0]) : undefined;
-  }
-
-  rightCardinality (compiler: Compiler): { min: number; max: number | '*' } | undefined {
-    const c = this.cardinalities(compiler);
-    return c ? parseCardinality(c[1]) : undefined;
-  }
-
   leftToken (): SyntaxNode {
     if (this.declaration instanceof AttributeNode) {
       const columnField = this.declaration.parentOfKind(FunctionApplicationNode);
