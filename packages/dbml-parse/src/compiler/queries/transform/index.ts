@@ -5,5 +5,10 @@ export {
   type DiagramViewSyncOperation,
   type DiagramViewBlock,
 } from './syncDiagramView';
-export { applyTextEdits, type TextEdit } from './applyTextEdits';
+export {
+  applyTextEdits,
+  toPositionTextEdit,
+  type TextEdit,
+  type PositionTextEdit,
+} from './applyTextEdits';
 export { type TableNameInput } from './utils';

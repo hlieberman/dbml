@@ -1,7 +1,24 @@
+import { offsetToPosition } from '@/core/types/position';
+import type { Position } from '@/core/types/position';
+
 export interface TextEdit {
   start: number;
   end: number;
   newText: string;
+}
+
+export interface PositionTextEdit {
+  newText: string;
+  startPos: Position;
+  endPos: Position;
+}
+
+export function toPositionTextEdit (edit: TextEdit, source: string): PositionTextEdit {
+  return {
+    newText: edit.newText,
+    startPos: offsetToPosition(source, edit.start),
+    endPos: offsetToPosition(source, edit.end),
+  };
 }
 
 /**

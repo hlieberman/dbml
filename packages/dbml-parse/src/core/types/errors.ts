@@ -1,4 +1,4 @@
-import { TextEdit } from '@/compiler';
+import type { PositionTextEdit } from '@/compiler/queries/transform/applyTextEdits';
 import { Filepath } from './filepath';
 import { SyntaxNode } from '@/core/types/nodes';
 import { SyntaxToken } from '@/core/types/tokens';
@@ -210,7 +210,7 @@ export class CompileWarning extends Error {
 export interface QuickFix {
   title: string;
   filepath: Filepath;
-  edits: TextEdit[];
+  edits: PositionTextEdit[];
 }
 
 export class CompileInfo extends Error {
