@@ -945,4 +945,44 @@ describe('[example - record] FK skip validation for one side', () => {
     // null in merchants.id should trigger FK violation (must not be null)
     expect(warnings.some((w) => w.diagnostic.includes('must not be null'))).toBe(true);
   });
+
+  test('should treat injected column in pk index as not nullable', () => {
+    const source = `
+      TablePartial pk_col {
+        region varchar
+      }
+
+      Table products {
+        id int
+        ~pk_col
+
+        indexes {
+          (id, region) [pk]
+        }
+      }
+
+      Table orders {
+        id int [pk]
+        product_id int
+        region varchar
+      }
+
+      Ref: orders.(product_id, region) > products.(id, region)
+
+      records products(id, region) {
+        1, "US"
+        null, "EU"
+      }
+
+      records orders(id, product_id, region) {
+        1, 1, "US"
+      }
+    `;
+    const result = interpret(source);
+    const warnings = result.getWarnings();
+
+    // products.region is injected from partial but is in a PK index on products
+    // null in products.id should trigger FK violation
+    expect(warnings.some((w) => w.diagnostic.includes('must not be null'))).toBe(true);
+  });
 });

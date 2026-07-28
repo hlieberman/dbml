@@ -2,7 +2,9 @@ import type Compiler from '@/compiler';
 import { CompileErrorCode, CompileInfo } from '@/core/types/errors';
 import type { QuickFix } from '@/core/types/errors';
 import type { SyntaxToken } from '@/core/types/tokens';
-import type { ColumnSymbol, TableSymbol } from '@/core/types/symbol';
+import type { SyntaxNode } from '@/core/types/nodes';
+import type { ColumnSymbol } from '@/core/types/symbol';
+import { TableSymbol, InjectedColumnSymbol } from '@/core/types/symbol/symbols';
 import { ElementDeclarationNode } from '@/core/types/nodes';
 import { UNHANDLED } from '@/core/types/module';
 import type { Index } from '@/core/types/schemaJson';
@@ -28,8 +30,8 @@ export function validateCardinality (
   meta: RefMetadata | PartialRefMetadata,
   side: 'left' | 'right', // Whether we're validating the left side or the right side
   options?: {
-    allowOtherColFix?: boolean; // Whether the side we're owning is fixable
-    allowOwnColFix?: boolean; // Whether the side we're not owning is fixable
+    allowOtherColFix?: boolean; // Whether the other side's columns are fixable
+    allowOwnColFix?: boolean; // Whether this side's columns are fixable
   },
 ): CompileInfo[] {
   const { allowOtherColFix = true, allowOwnColFix = true } = options ?? {};
@@ -61,6 +63,15 @@ export function validateCardinality (
 
   const infos: CompileInfo[] = [];
 
+  function pushInfos (node: SyntaxNode | SyntaxToken, columns: ColumnSymbol[], msg: string, fixes: QuickFix[]) {
+    infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, node, { quickFixes: fixes }));
+    for (const col of columns) {
+      if (col.declaration) {
+        infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, col.declaration, { quickFixes: fixes }));
+      }
+    }
+  }
+
   // Determine if the other side is the source (FK) side.
   // Nullability checks on otherColumns only make sense for the source side.
   const otherIsSource = otherCard.max === '*' || (ownCard.max === 1 && otherCard.max === 1 && side === 'left');
@@ -77,16 +88,11 @@ export function validateCardinality (
         ? `Column '${qnames}' is nullable but operator '${op}' requires it to be NOT NULL`
         : `Columns (${qnames}) are all nullable but operator '${op}' requires at least one to be NOT NULL`;
       const fixes = [
-        opToken && suggestChangeOp(opToken, makeCardinalityOptional(rawOwnCard), rawOtherCard, side, `Make '${qnames}' optional in the ref`, compiler),
+        suggestChangeOp(opToken, makeCardinalityOptional(rawOwnCard), rawOtherCard, side, `Make '${qnames}' optional in the ref`, compiler),
         ...(allowOtherColFix ? otherColumns.map((col) => suggestMakeNotNull(col, compiler)).filter((f): f is QuickFix => !!f) : []),
       ].filter((f): f is QuickFix => !!f);
 
-      infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, otherNode, { quickFixes: fixes }));
-      for (const col of otherColumns) {
-        if (col.declaration) {
-          infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, col.declaration, { quickFixes: fixes }));
-        }
-      }
+      pushInfos(otherNode, otherColumns, msg, fixes);
     }
   }
 
@@ -99,16 +105,11 @@ export function validateCardinality (
         ? `Column '${qnames}' is NOT NULL but operator '${op}' allows it to be optional`
         : `Columns (${qnames}) are NOT NULL but operator '${op}' allows them to be optional`;
       const fixes = [
-        opToken && suggestChangeOp(opToken, makeCardinalityRequired(rawOwnCard), rawOtherCard, side, `Make '${qnames}' required in the ref`, compiler),
+        suggestChangeOp(opToken, makeCardinalityRequired(rawOwnCard), rawOtherCard, side, `Make '${qnames}' required in the ref`, compiler),
         ...(allowOtherColFix ? otherColumns.map((col) => suggestMakeNullable(col, compiler)).filter((f): f is QuickFix => !!f) : []),
       ].filter((f): f is QuickFix => !!f);
 
-      infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, otherNode, { quickFixes: fixes }));
-      for (const col of otherColumns) {
-        if (col.declaration) {
-          infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, col.declaration, { quickFixes: fixes }));
-        }
-      }
+      pushInfos(otherNode, otherColumns, msg, fixes);
     }
   }
 
@@ -121,15 +122,10 @@ export function validateCardinality (
       ? `Column '${qnames}' is unique but operator '${op}' allows many`
       : `Columns (${qnames}) have a unique index but operator '${op}' allows many`;
     const fixes = [
-      opToken && suggestChangeOp(opToken, CARDINALITY_ONE, rawOtherCard, side, `Make '${qnames}' one in the ref`, compiler),
+      suggestChangeOp(opToken, CARDINALITY_ONE, rawOtherCard, side, `Make '${qnames}' one in the ref`, compiler),
     ].filter((f): f is QuickFix => !!f);
 
-    infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, ownNode, { quickFixes: fixes }));
-    for (const col of ownColumns) {
-      if (col.declaration) {
-        infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, col.declaration, { quickFixes: fixes }));
-      }
-    }
+    pushInfos(ownNode, ownColumns, msg, fixes);
   }
 
   // card.max === 1: ownColumns should be unique/pk.
@@ -139,16 +135,11 @@ export function validateCardinality (
       ? `Column '${qnames}' should be unique or primary key for operator '${op}'`
       : `Columns (${qnames}) should have a composite unique index for operator '${op}'`;
     const fixes = [
-      opToken && suggestChangeOp(opToken, makeCardinalityMany(rawOwnCard), rawOtherCard, side, `Make '${qnames}' many in the ref`, compiler),
+      suggestChangeOp(opToken, makeCardinalityMany(rawOwnCard), rawOtherCard, side, `Make '${qnames}' many in the ref`, compiler),
       allowOwnColFix && ownColumns.length === 1 && suggestMakeUnique(ownColumns[0], compiler),
     ].filter((f): f is QuickFix => !!f);
 
-    infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, ownNode, { quickFixes: fixes }));
-    for (const col of ownColumns) {
-      if (col.declaration) {
-        infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, col.declaration, { quickFixes: fixes }));
-      }
-    }
+    pushInfos(ownNode, ownColumns, msg, fixes);
   }
 
   return infos;
@@ -231,15 +222,17 @@ function suggestMakeNullable (col: ColumnSymbol, compiler: Compiler): QuickFix |
 function isColumnsUnique (compiler: Compiler, columns: ColumnSymbol[]): boolean {
   if (columns.length === 0) return false;
 
-  if (columns.length === 1) {
-    return columns[0].unique(compiler);
+  if (columns.length === 1 && columns[0].unique(compiler)) {
+    return true;
   }
 
   // Find the owner table from the first column's declaration
-  const tableNode = columns[0].declaration?.parentOfKind(ElementDeclarationNode);
+  const col = columns[0];
+  const decl = col instanceof InjectedColumnSymbol ? col.injectionDeclaration : col.declaration;
+  const tableNode = decl?.parentOfKind(ElementDeclarationNode);
   if (!tableNode) return false;
-  const tableSymbol = compiler.nodeSymbol(tableNode).getFiltered(UNHANDLED) as TableSymbol | undefined;
-  if (!tableSymbol) return false;
+  const tableSymbol = compiler.nodeSymbol(tableNode).getFiltered(UNHANDLED);
+  if (!(tableSymbol instanceof TableSymbol)) return false;
 
   // Get all interpreted indexes from the table
   const indexMetas = tableSymbol.mergedIndexes(compiler);

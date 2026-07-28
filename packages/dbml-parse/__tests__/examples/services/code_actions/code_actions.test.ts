@@ -247,6 +247,47 @@ describe('[example] code actions - ref constraint quick fixes', () => {
       expect(fixes.some((f) => f.title.startsWith('Mark') && f.title.includes('user_code'))).toBe(false);
     });
 
+    test('injected column isColumnsUnique checks target table indexes', () => {
+      const source = `
+        Table users {
+          id int [pk]
+          code int
+        }
+        TablePartial user_ref {
+          user_code int [not null, ref: - users.code]
+        }
+        Table posts {
+          id int [pk]
+          ~user_ref
+        }
+      `;
+      const fixes = getQuickFixes(source);
+      // The UNIQUE fix for users.code should reference users.code (non-partial column)
+      const uniqueFix = fixes.find((f) => f.title.includes('UNIQUE'));
+      expect(uniqueFix).toBeDefined();
+      expect(uniqueFix!.title).toContain('users.code');
+    });
+
+    test('injected column with composite unique index on target table produces no uniqueness fix', () => {
+      const source = `
+        Table users { id int [pk] }
+        TablePartial user_ref {
+          user_id int [not null, ref: - users.id]
+        }
+        Table posts {
+          id int [pk]
+          ~user_ref
+          indexes {
+            (id, user_id) [unique]
+          }
+        }
+      `;
+      const fixes = getQuickFixes(source);
+      // The composite unique index on posts covers user_id, so no UNIQUE fix
+      const uniqueFixes = fixes.filter((f) => f.title.includes('UNIQUE'));
+      expect(uniqueFixes).toHaveLength(0);
+    });
+
     test('table partial inline ref produces no column fixes for partial columns', () => {
       const source = `
         Table users { id int [pk] }

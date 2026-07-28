@@ -494,7 +494,8 @@ export class ColumnSymbol extends NodeSymbol {
 
   qualifiedName (compiler: Compiler): string[] {
     const colName = this.name ?? '';
-    const tableNode = this.declaration?.parentOfKind(ElementDeclarationNode);
+    const decl = this instanceof InjectedColumnSymbol ? this.injectionDeclaration : this.declaration;
+    const tableNode = decl?.parentOfKind(ElementDeclarationNode);
     if (!tableNode) return [
       colName,
     ];
@@ -551,7 +552,8 @@ export class ColumnSymbol extends NodeSymbol {
 
   private isInPkIndex (compiler: Compiler): boolean {
     if (!this.declaration || !this.name) return false;
-    const tableNode = this.declaration.parentOfKind(ElementDeclarationNode);
+    const decl = this instanceof InjectedColumnSymbol ? this.injectionDeclaration : this.declaration;
+    const tableNode = decl.parentOfKind(ElementDeclarationNode);
     if (!tableNode) return false;
     const tableSymbol = compiler.nodeSymbol(tableNode).getFiltered(UNHANDLED);
     if (!(tableSymbol instanceof TableSymbol)) return false;
