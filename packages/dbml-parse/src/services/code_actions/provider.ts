@@ -60,23 +60,27 @@ export default class DBMLCodeActionProvider implements CodeActionProvider {
     return { actions: unique, dispose () {} };
   }
 
-  // Convert a QuickFix to a Monaco CodeAction using pre-computed line/column positions.
+  // Convert a QuickFix (offset-based) to a Monaco CodeAction (line/column-based).
   private quickFixToCodeAction (fix: QuickFix, model: TextModel, marker: MarkerData): CodeAction {
     const resource = Uri.parse(fix.filepath.toUri({ protocol: model.uri.scheme }));
     const edit: WorkspaceEdit = {
-      edits: fix.edits.map((e) => ({
-        resource,
-        textEdit: {
-          range: {
-            startLineNumber: e.startPos.line,
-            startColumn: e.startPos.column,
-            endLineNumber: e.endPos.line,
-            endColumn: e.endPos.column,
+      edits: fix.edits.map((e) => {
+        const startPos = model.getPositionAt(e.start);
+        const endPos = model.getPositionAt(e.end);
+        return {
+          resource,
+          textEdit: {
+            range: {
+              startLineNumber: startPos.lineNumber,
+              startColumn: startPos.column,
+              endLineNumber: endPos.lineNumber,
+              endColumn: endPos.column,
+            },
+            text: e.newText,
           },
-          text: e.newText,
-        },
-        versionId: model.getVersionId(),
-      })),
+          versionId: model.getVersionId(),
+        };
+      }),
     };
 
     // Link the action to the marker so Monaco shows it as a quick fix.

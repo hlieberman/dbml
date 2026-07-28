@@ -15,7 +15,6 @@ import {
   CARDINALITY_ONE,
 } from '@/core/types/relation';
 import { addSettingEdit, removeSettingEdit } from '@/core/utils/setting';
-import { toPositionTextEdit } from '@/compiler/queries/transform/applyTextEdits';
 import type { RefMetadata, PartialRefMetadata } from '@/core/types/symbol/metadata';
 
 // Check consistency between a ref's cardinality and column constraints for one side.
@@ -88,7 +87,7 @@ export function validateCardinality (
         ? `Column '${qnames}' is nullable but operator '${op}' requires it to be NOT NULL`
         : `Columns (${qnames}) are all nullable but operator '${op}' requires at least one to be NOT NULL`;
       const fixes = [
-        suggestChangeOp(opToken, makeCardinalityOptional(rawOwnCard), rawOtherCard, side, `Make '${qnames}' optional in the ref`, compiler),
+        opToken && suggestChangeOp(opToken, makeCardinalityOptional(rawOwnCard), rawOtherCard, side, `Make '${qnames}' optional in the ref`),
         ...(allowOtherColFix ? otherColumns.map((col) => suggestMakeNotNull(col, compiler)).filter((f): f is QuickFix => !!f) : []),
       ].filter((f): f is QuickFix => !!f);
 
@@ -105,7 +104,7 @@ export function validateCardinality (
         ? `Column '${qnames}' is NOT NULL but operator '${op}' allows it to be optional`
         : `Columns (${qnames}) are NOT NULL but operator '${op}' allows them to be optional`;
       const fixes = [
-        suggestChangeOp(opToken, makeCardinalityRequired(rawOwnCard), rawOtherCard, side, `Make '${qnames}' required in the ref`, compiler),
+        opToken && suggestChangeOp(opToken, makeCardinalityRequired(rawOwnCard), rawOtherCard, side, `Make '${qnames}' required in the ref`),
         ...(allowOtherColFix ? otherColumns.map((col) => suggestMakeNullable(col, compiler)).filter((f): f is QuickFix => !!f) : []),
       ].filter((f): f is QuickFix => !!f);
 
@@ -122,7 +121,7 @@ export function validateCardinality (
       ? `Column '${qnames}' is unique but operator '${op}' allows many`
       : `Columns (${qnames}) have a unique index but operator '${op}' allows many`;
     const fixes = [
-      suggestChangeOp(opToken, CARDINALITY_ONE, rawOtherCard, side, `Make '${qnames}' one in the ref`, compiler),
+      opToken && suggestChangeOp(opToken, CARDINALITY_ONE, rawOtherCard, side, `Make '${qnames}' one in the ref`),
     ].filter((f): f is QuickFix => !!f);
 
     pushInfos(ownNode, ownColumns, msg, fixes);
@@ -135,7 +134,7 @@ export function validateCardinality (
       ? `Column '${qnames}' should be unique or primary key for operator '${op}'`
       : `Columns (${qnames}) should have a composite unique index for operator '${op}'`;
     const fixes = [
-      suggestChangeOp(opToken, makeCardinalityMany(rawOwnCard), rawOtherCard, side, `Make '${qnames}' many in the ref`, compiler),
+      opToken && suggestChangeOp(opToken, makeCardinalityMany(rawOwnCard), rawOtherCard, side, `Make '${qnames}' many in the ref`),
       allowOwnColFix && ownColumns.length === 1 && suggestMakeUnique(ownColumns[0], compiler),
     ].filter((f): f is QuickFix => !!f);
 
@@ -158,10 +157,7 @@ function suggestChangeOp (
   otherRel: RelationCardinality,
   side: 'left' | 'right',
   description: string,
-  compiler: Compiler,
-): QuickFix | undefined {
-  const source = compiler.getSource(opToken.filepath);
-  if (!source) return undefined;
+): QuickFix {
   const newLeft = side === 'left' ? newThisRel : otherRel;
   const newRight = side === 'right' ? newThisRel : otherRel;
   const newOp = getRelationshipOp(newLeft, newRight);
@@ -170,7 +166,7 @@ function suggestChangeOp (
     title: `${description} (change operator to '${newOp}')`,
     filepath: opToken.filepath,
     edits: [
-      toPositionTextEdit({ start: opToken.start, end: opToken.end, newText: newOp }, source),
+      { start: opToken.start, end: opToken.end, newText: newOp },
     ],
   };
 }
@@ -188,7 +184,7 @@ function suggestMakeNotNull (col: ColumnSymbol, compiler: Compiler): QuickFix | 
     return { title: `Mark '${qname}' as NOT NULL`,
       filepath: col.declaration.filepath,
       edits: [
-        toPositionTextEdit(removeNull, source),
+        removeNull,
       ] };
   }
 
@@ -197,7 +193,7 @@ function suggestMakeNotNull (col: ColumnSymbol, compiler: Compiler): QuickFix | 
   return { title: `Mark '${qname}' as NOT NULL`,
     filepath: col.declaration.filepath,
     edits: [
-      toPositionTextEdit(edit, source),
+      edit,
     ] };
 }
 
@@ -212,7 +208,7 @@ function suggestMakeNullable (col: ColumnSymbol, compiler: Compiler): QuickFix |
   return { title: `Mark '${col.qualifiedName(compiler).join('.')}' as NULL`,
     filepath: col.declaration.filepath,
     edits: [
-      toPositionTextEdit(edit, source),
+      edit,
     ] };
 }
 
@@ -259,13 +255,9 @@ function suggestMakeUnique (col: ColumnSymbol, compiler: Compiler): QuickFix | u
 
   const edit = addSettingEdit(col.declaration, 'unique');
   if (!edit) return undefined;
-  const source = compiler.getSource(col.declaration.filepath);
-  if (!source) return undefined;
-  return {
-    title: `Mark '${col.qualifiedName(compiler).join('.')}' as UNIQUE`,
+  return { title: `Mark '${col.qualifiedName(compiler).join('.')}' as UNIQUE`,
     filepath: col.declaration.filepath,
     edits: [
-      toPositionTextEdit(edit, source),
-    ],
-  };
+      edit,
+    ] };
 }
