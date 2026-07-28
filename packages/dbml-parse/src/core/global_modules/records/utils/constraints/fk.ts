@@ -88,8 +88,10 @@ function validateForeignKey (
 
   if (!table1 || !table2) return [];
 
-  const endpoint1 = table1.tableSymbol.mergedColumns(compiler).filter((c) => typeof c.name === 'string' && rawEndpoint1.fieldNames.includes(c.name));
-  const endpoint2 = table2.tableSymbol.mergedColumns(compiler).filter((c) => typeof c.name === 'string' && rawEndpoint2.fieldNames.includes(c.name));
+  const columns1 = table1.tableSymbol.mergedColumns(compiler);
+  const columns2 = table2.tableSymbol.mergedColumns(compiler);
+  const endpoint1 = compact(rawEndpoint1.fieldNames.map((fn) => columns1.find((c) => c.name === fn)));
+  const endpoint2 = compact(rawEndpoint2.fieldNames.map((fn) => columns2.find((c) => c.name === fn)));
 
   const { min: min1, max: max1 } = parseCardinality(rawEndpoint1.relation);
   const { min: min2, max: max2 } = parseCardinality(rawEndpoint2.relation);
