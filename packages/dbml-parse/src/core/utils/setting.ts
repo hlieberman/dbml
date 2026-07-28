@@ -93,10 +93,10 @@ function findSetting (source: string, declaration: SyntaxNode, settingName: stri
   if (!settingsList) return undefined;
 
   const elements = settingsList.elementList ?? [];
-  const settingIndex = elements.findIndex((el) => {
-    if (!(el instanceof AttributeNode)) return false;
-    const text = source.substring(el.start, el.end).trim();
-    return text === settingName || text.startsWith(`${settingName}:`);
+  const settingIndex = elements.findIndex((element) => {
+    if (!(element instanceof AttributeNode)) return false;
+    const nameText = element.name ? source.substring(element.name.start, element.name.end).trim() : source.substring(element.start, element.end).trim();
+    return nameText === settingName;
   });
   if (settingIndex === -1) return undefined;
 
