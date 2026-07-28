@@ -494,14 +494,12 @@ export class ColumnSymbol extends NodeSymbol {
 
   qualifiedName (compiler: Compiler): string {
     const tableNode = this.declaration?.parentOfKind(ElementDeclarationNode);
-    if (tableNode) {
-      const tableSymbol = compiler.nodeSymbol(tableNode).getFiltered(UNHANDLED) as TableSymbol | undefined;
-      if (tableSymbol) {
-        const { schema, name } = tableSymbol.interpretedName(compiler, this.filepath);
-        return schema ? `${schema}.${name}.${this.name}` : `${name}.${this.name}`;
-      }
-    }
-    return this.name ?? '';
+    if (!tableNode) return this.name ?? '';
+    const tableSymbol = compiler.nodeSymbol(tableNode).getFiltered(UNHANDLED) as TableSymbol | undefined;
+    if (!tableSymbol) return this.name ?? '';
+
+    const { schema, name } = tableSymbol.interpretedName(compiler, this.filepath);
+    return schema ? `${schema}.${name}.${this.name}` : `${name}.${this.name}`;
   }
 
   pk (compiler: Compiler): boolean {
