@@ -519,7 +519,6 @@ export class ColumnSymbol extends NodeSymbol {
   }
 
   unique (compiler: Compiler): boolean {
-    if (!this.declaration) return false;
     return this.isUniqueSet(compiler) || this.pk(compiler) || this.increment(compiler);
   }
 
