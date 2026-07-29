@@ -84,20 +84,19 @@ class Database extends Element {
       schema.pushRef(ref);
     });
 
-    this.adjustCardinalities();
   }
 
-  generateId (): void {
+  private generateId (): void {
     this.id = this.dbState.generateId('dbId');
   }
 
-  processNotes (rawNotes: any[]): void {
+  private processNotes (rawNotes: any[]): void {
     rawNotes.forEach((note) => {
       this.pushNote(new StickyNote({ ...note, database: this }));
     });
   }
 
-  processRecords (rawRecords: RawTableRecord[]): void {
+  private processRecords (rawRecords: RawTableRecord[]): void {
     rawRecords.forEach(({
       schemaName, tableName, columns, values, token,
     }) => {
@@ -112,41 +111,41 @@ class Database extends Element {
     });
   }
 
-  processTablePartials (rawTablePartials: any[]): void {
+  private processTablePartials (rawTablePartials: any[]): void {
     rawTablePartials.forEach((rawTablePartial) => {
       this.tablePartials.push(new TablePartial({ ...rawTablePartial, dbState: this.dbState }));
     });
   }
 
-  pushNote (note: StickyNote): void {
+  private pushNote (note: StickyNote): void {
     this.checkNote(note);
     this.notes.push(note);
   }
 
-  checkNote (note: StickyNote): void {
+  private checkNote (note: StickyNote): void {
     if (this.notes.some((n) => n.name === note.name)) {
       note.error(`Notes ${note.name} existed`);
     }
   }
 
-  processSchemas (rawSchemas: any[]): void {
+  private processSchemas (rawSchemas: any[]): void {
     rawSchemas.forEach((schema) => {
       this.pushSchema(new Schema({ ...schema, database: this }));
     });
   }
 
-  pushSchema (schema: Schema): void {
+  private pushSchema (schema: Schema): void {
     this.checkSchema(schema);
     this.schemas.push(schema);
   }
 
-  checkSchema (schema: Schema): void {
+  private checkSchema (schema: Schema): void {
     if (this.schemas.some((s) => s.name === schema.name)) {
       schema.error(`Schemas ${schema.name} existed`);
     }
   }
 
-  processSchemaElements (elements: any[], elementType: string): void {
+  private processSchemaElements (elements: any[], elementType: string): void {
     let schema: Schema;
 
     elements.forEach((element) => {
@@ -182,7 +181,7 @@ class Database extends Element {
     });
   }
 
-  linkRecordsToTables (): void {
+  private linkRecordsToTables (): void {
     // Build a map of [schemaName][tableName] -> table for O(1) lookup
     const tableMap: Record<string, Record<string, Table>> = {};
     this.schemas.forEach((schema) => {
@@ -263,7 +262,7 @@ class Database extends Element {
   // SQL importers just import everything as optional
   // So we need to adjust the cardinality of those if they are in actuality required
   // We only handle one-to-many/many-to-one/one-to-one here
-  adjustCardinalities (): void {
+  adjustCardinalitiesFromColumns (): void {
     this.schemas.forEach((schema) => {
       schema.refs.forEach((ref) => {
         const manyEndpoint = ref.endpoints.find((e: any) => parseCardinality(e.relation).max === '*');
@@ -303,7 +302,7 @@ class Database extends Element {
     };
   }
 
-  shallowExport () {
+  private shallowExport () {
     return {
       hasDefaultSchema: this.hasDefaultSchema,
       note: this.note,
@@ -312,7 +311,7 @@ class Database extends Element {
     };
   }
 
-  exportChild () {
+  private exportChild () {
     return {
       schemas: this.schemas.map((s) => s.export()),
       notes: this.notes.map((n) => n.export()),
@@ -320,7 +319,7 @@ class Database extends Element {
     };
   }
 
-  exportChildIds () {
+  private exportChildIds () {
     return {
       schemaIds: this.schemas.map((s) => s.id),
       noteIds: this.notes.map((n) => n.id),

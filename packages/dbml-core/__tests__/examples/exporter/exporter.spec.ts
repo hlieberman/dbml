@@ -1,6 +1,6 @@
 import exporter from '../../../src/export';
 import { scanTestNames, getFileExtension } from '../testHelpers';
-import { ExportFormat } from '../../../types/export/ModelExporter';
+import { ExportFormat } from '../../../types/export';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { test, expect, describe } from 'vitest';
@@ -112,7 +112,7 @@ Table "posts" {
 Ref:"posts"."user_id" -? "users"."id"`);
     });
 
-    test('should export ref with operator >? (flipped to < due to non-nullability inference)', () => {
+    test('should export ref with operator >? (no cardinality override for DBML sources)', () => {
       const input = `
 Table users { id integer [pk] }
 Table posts { user_id integer [not null] }
@@ -128,7 +128,7 @@ Table "posts" {
   "user_id" integer [not null]
 }
 
-Ref:"users"."id" < "posts"."user_id"`);
+Ref:"users"."id" ?< "posts"."user_id"`);
     });
 
     test('should export ref with operator ?<?', () => {
@@ -147,7 +147,7 @@ Table "posts" {
   "user_id" integer
 }
 
-Ref:"posts"."user_id" <? "users"."id"`);
+Ref:"posts"."user_id" ?<? "users"."id"`);
     });
   });
 

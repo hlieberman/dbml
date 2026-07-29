@@ -46,11 +46,11 @@ class Schema extends Element {
     this.processTableGroups(tableGroups);
   }
 
-  generateId (): void {
+  private generateId (): void {
     this.id = this.dbState.generateId('schemaId');
   }
 
-  processTables (rawTables: any[]): void {
+  private processTables (rawTables: any[]): void {
     rawTables.forEach((table) => {
       this.pushTable(new Table({ ...table, schema: this }));
     });
@@ -61,7 +61,7 @@ class Schema extends Element {
     this.tables.push(table);
   }
 
-  checkTable (table: Table): void {
+  private checkTable (table: Table): void {
     if (this.tables.some((t) => t.name === table.name)) {
       table.error(`Table ${shouldPrintSchema(this) ? `"${this.name}".` : ''}"${table.name}" existed`);
     }
@@ -71,7 +71,7 @@ class Schema extends Element {
     return this.tables.find((t) => t.name === tableName);
   }
 
-  processEnums (rawEnums: any[]): void {
+  private processEnums (rawEnums: any[]): void {
     rawEnums.forEach((_enum) => {
       this.pushEnum(new Enum({ ..._enum, schema: this }));
     });
@@ -82,7 +82,7 @@ class Schema extends Element {
     this.enums.push(_enum);
   }
 
-  checkEnum (_enum: Enum): void {
+  private checkEnum (_enum: Enum): void {
     if (this.enums.some((e) => e.name === _enum.name)) {
       _enum.error(`Enum ${shouldPrintSchema(this)
         ? `"${this.name}".`
@@ -90,7 +90,7 @@ class Schema extends Element {
     }
   }
 
-  processRefs (rawRefs: any[]): void {
+  private processRefs (rawRefs: any[]): void {
     rawRefs.forEach((ref) => {
       this.pushRef(new Ref({ ...ref, schema: this }));
     });
@@ -101,7 +101,7 @@ class Schema extends Element {
     this.refs.push(ref);
   }
 
-  checkRef (ref: Ref): void {
+  private checkRef (ref: Ref): void {
     if (this.refs.some((r) => r.equals(ref as any))) {
       const endpoint1 = ref.endpoints[0];
       const fieldList1 = endpoint1.fieldNames.map((s) => JSON.stringify(s)).join(', ');
@@ -113,7 +113,7 @@ class Schema extends Element {
     }
   }
 
-  processTableGroups (rawTableGroups: any[]): void {
+  private processTableGroups (rawTableGroups: any[]): void {
     rawTableGroups.forEach((tableGroup) => {
       this.pushTableGroup(new TableGroup({ ...tableGroup, schema: this }));
     });
@@ -124,7 +124,7 @@ class Schema extends Element {
     this.tableGroups.push(tableGroup);
   }
 
-  checkTableGroup (tableGroup: TableGroup): void {
+  private checkTableGroup (tableGroup: TableGroup): void {
     if (this.tableGroups.some((tg) => tg.name === tableGroup.name)) {
       tableGroup.error(`Table Group ${shouldPrintSchema(this) ? `"${this.name}".` : ''}"${tableGroup.name}" existed`);
     }
@@ -144,7 +144,7 @@ class Schema extends Element {
     };
   }
 
-  exportChild () {
+  private exportChild () {
     return {
       tables: this.tables.map((t) => t.export()),
       enums: this.enums.map((e) => e.export()),
@@ -153,7 +153,7 @@ class Schema extends Element {
     };
   }
 
-  exportChildIds () {
+  private exportChildIds () {
     return {
       tableIds: this.tables.map((t) => t.id),
       enumIds: this.enums.map((e) => e.id),
@@ -162,13 +162,13 @@ class Schema extends Element {
     };
   }
 
-  exportParentIds () {
+  private exportParentIds () {
     return {
       databaseId: this.database.id,
     };
   }
 
-  shallowExport () {
+  private shallowExport () {
     return {
       name: this.name,
       note: this.note,
