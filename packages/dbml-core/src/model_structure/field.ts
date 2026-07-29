@@ -31,7 +31,7 @@ interface RawField {
 
 class Field extends Element {
   declare id: number;
-  declare error: (message: string) => never;
+  declare error: (_message: string) => never;
   name: string;
   type: any;
   unique: boolean;

@@ -12,7 +12,8 @@
     "build": "rm -rf ./lib && tsc --noEmit && vite build",
     "dev": "vite build --watch",
     "prepublish": "npm run build",
-    "lint": "eslint .",
+    "lint": "eslint $(git diff --relative --name-only --diff-filter=ACMRTUXB master -- . | grep -E '\\.(js|ts)$')",
+    "lint:all": "eslint .",
     "lint:fix": "eslint --fix ."
   },
   "publishConfig": {

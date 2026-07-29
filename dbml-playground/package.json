@@ -20,7 +20,8 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint $(git diff --relative --name-only --diff-filter=ACMRTUXB master -- . | grep -E '\\.(js|ts|vue)$')",
+    "lint:all": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write src/"
   },

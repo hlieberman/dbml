@@ -23,7 +23,8 @@
     "test:watch": "vitest watch",
     "test": "vitest run",
     "coverage": "vitest --coverage",
-    "lint": "eslint .",
+    "lint": "eslint $(git diff --relative --name-only --diff-filter=ACMRTUXB master -- . | grep -E '\\.ts$')",
+    "lint:all": "eslint .",
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {

@@ -162,10 +162,10 @@ Metadata TableGroup g1 {
 }`;
       const result = interpret(source);
       expect(result.getErrors()).toHaveLength(0);
-      const g = result.getValue()?.tableGroups?.find((tg) => tg.name === 'g1')!;
-      expect(g.note?.value).toBe('group note');
-      expect(g.color).toBe('#123');
-      expect(g.metadata).toMatchObject({});
+      const g = result.getValue()?.tableGroups?.find((tg) => tg.name === 'g1');
+      expect(g?.note?.value).toBe('group note');
+      expect(g?.color).toBe('#123');
+      expect(g?.metadata).toMatchObject({});
     });
   });
 
@@ -181,11 +181,11 @@ Metadata Note overview {
 }`;
       const result = interpret(source);
       expect(result.getErrors()).toHaveLength(0);
-      const n = result.getValue()?.notes?.find((note) => note.name === 'overview')!;
-      expect(n.color).toBe('#456');
+      const n = result.getValue()?.notes?.find((note) => note.name === 'overview');
+      expect(n?.color).toBe('#456');
       // content is unchanged; `note` is just custom metadata.
-      expect(n.content).toBe('the note body');
-      expect(n.metadata).toMatchObject({ note: 'should stay custom' });
+      expect(n?.content).toBe('the note body');
+      expect(n?.metadata).toMatchObject({ note: 'should stay custom' });
     });
   });
 

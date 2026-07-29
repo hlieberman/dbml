@@ -21,7 +21,7 @@ interface RawTableGroup {
 
 class TableGroup extends Element {
   declare id: number;
-  declare error: (message: string) => never;
+  declare error: (_message: string) => never;
   name: string;
   tables: TableType[];
   schema: SchemaType;
@@ -70,15 +70,15 @@ class TableGroup extends Element {
 
   checkTable (table: TableType) {
     if (this.tables.some((t) => t.id === table.id)) {
-      this.error(`Table ${shouldPrintSchema((table as any).schema) ? `"${(table as any).schema.name}".` : ''}.${table.name} is already in the group`);
+      this.error(`Table ${shouldPrintSchema(table.schema) ? `"${table.schema.name}".` : ''}.${table.name} is already in the group`);
     }
 
-    if ((table as any).group) {
-      this.error(`Table ${shouldPrintSchema((table as any).schema)
-        ? `"${(table as any).schema.name}".`
-        : ''}.${table.name} is already in group ${shouldPrintSchema((table as any).group.schema)
-        ? `"${(table as any).group.schema.name}".`
-        : ''}${(table as any).group.name}`);
+    if (table.group) {
+      this.error(`Table ${shouldPrintSchema(table.schema)
+        ? `"${table.schema.name}".`
+        : ''}.${table.name} is already in group ${shouldPrintSchema(table.group.schema)
+        ? `"${table.group.schema.name}".`
+        : ''}${table.group.name}`);
     }
   }
 
@@ -91,7 +91,7 @@ class TableGroup extends Element {
 
   exportChild () {
     return {
-      tables: this.tables.map((t) => ({ tableName: t.name, schemaName: (t as any).schema.name })),
+      tables: this.tables.map((t) => ({ tableName: t.name, schemaName: t.schema.name })),
     };
   }
 

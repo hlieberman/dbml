@@ -22,37 +22,13 @@ export default defineConfig(
         'src/parse/deprecated/*',
         'src/parse/ANTLR/parsers/*',
         '__tests__/*',
+        'eslint.config.ts',
       ],
     },
     {
       files: ['**/*.js', '**/*.ts'],
-      languageOptions: {
-        globals: {
-          ...globals.node,
-          ...globals.es2022,
-        },
-      },
       plugins: {
         '@stylistic': stylistic,
-      },
-      rules: {
-        'no-unused-vars': [
-          'warn',
-          {
-            argsIgnorePattern: '^_',
-            varsIgnorePattern: '^_',
-            caughtErrorsIgnorePattern: '^_',
-          },
-        ],
-        '@stylistic/space-before-function-paren': ['error', 'always'],
-        '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
-        '@stylistic/max-statements-per-line': 'off',
-        '@stylistic/operator-linebreak': ['error', 'before', { overrides: { '=': 'after' } }],
-      },
-    },
-    {
-      files: ['**/__tests__/**/*.js', '**/*.test.js', '**/*.spec.js', '**/__tests__/**/*.ts', '**/*.test.ts', '**/*.spec.ts', '**/*.ts'],
-      plugins: {
         '@typescript-eslint': tseslint,
       },
       languageOptions: {

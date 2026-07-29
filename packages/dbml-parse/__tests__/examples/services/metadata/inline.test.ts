@@ -83,10 +83,10 @@ TableGroup g1 [color: #123, note: "gn", team: "growth"] {
 }`;
       const result = interpret(source);
       expect(result.getErrors()).toHaveLength(0);
-      const g = result.getValue()?.tableGroups?.find((tg) => tg.name === 'g1')!;
-      expect(g.color).toBe('#123');
-      expect(g.note?.value).toBe('gn');
-      expect(g.metadata).toEqual({ team: 'growth' });
+      const g = result.getValue()?.tableGroups?.find((tg) => tg.name === 'g1');
+      expect(g?.color).toBe('#123');
+      expect(g?.note?.value).toBe('gn');
+      expect(g?.metadata).toEqual({ team: 'growth' });
     });
   });
 
@@ -97,9 +97,9 @@ TableGroup g1 [color: #123, note: "gn", team: "growth"] {
 }`;
       const result = interpret(source);
       expect(result.getErrors()).toHaveLength(0);
-      const n = result.getValue()?.notes?.find((note) => note.name === 'overview')!;
-      expect(n.color).toBe('#456');
-      expect(n.metadata).toEqual({ author: 'alice' });
+      const n = result.getValue()?.notes?.find((note) => note.name === 'overview');
+      expect(n?.color).toBe('#456');
+      expect(n?.metadata).toEqual({ author: 'alice' });
     });
   });
 
@@ -128,8 +128,8 @@ Table users {
 }`;
       const result = interpret(source);
       expect(result.getErrors()).toHaveLength(0);
-      const partial = result.getValue()?.tablePartials?.find((p) => p.name === 'Base')!;
-      const col = partial.fields.find((f) => f.name === 'id');
+      const partial = result.getValue()?.tablePartials?.find((p) => p.name === 'Base');
+      const col = partial?.fields.find((f) => f.name === 'id');
       expect(col?.metadata).toMatchObject({ owner: 'data-team' });
     });
   });

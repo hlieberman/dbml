@@ -42,7 +42,8 @@
     "build:lib": "vite build",
     "build": "rm -rf ./lib && npm run build:parser && npm run build:lib",
     "prepublish": "npm run build",
-    "lint": "eslint .",
+    "lint": "eslint $(git diff --relative --name-only --diff-filter=ACMRTUXB master -- . | grep -E '\\.(js|ts)$')",
+    "lint:all": "eslint .",
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {

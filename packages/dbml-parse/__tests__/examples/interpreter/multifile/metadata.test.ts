@@ -1,5 +1,4 @@
 import { describe, expect, test } from 'vitest';
-import { CompileErrorCode } from '@/index';
 import { getDatabase, setupCompiler, fp } from './utils';
 
 describe('[example] multifile interpreter - auto-imported metadata', () => {
