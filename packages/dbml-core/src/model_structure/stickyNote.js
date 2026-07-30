@@ -35,7 +35,7 @@ class StickyNote extends Element {
   }
 
   /**
-   * @param {import('../../types/model_structure/database').NormalizedDatabase} model
+   * @param {import('../../types/model_structure/database').NormalizedModel} model
    */
   normalize (model) {
     model.notes[this.id] = {
