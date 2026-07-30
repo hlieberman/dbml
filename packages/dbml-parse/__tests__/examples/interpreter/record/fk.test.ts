@@ -986,3 +986,4 @@ describe('[example - record] FK skip validation for one side', () => {
     expect(warnings.some((w) => w.diagnostic.includes('must not be null'))).toBe(true);
   });
 });
+
