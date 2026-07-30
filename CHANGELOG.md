@@ -20,7 +20,7 @@
   * [#924](https://github.com/holistics/dbml/pull/924) chore(deps): bump shell-quote from 1.8.1 to 1.8.4 in /dbml-homepage ([@dependabot[bot]](https://github.com/apps/dependabot))
   * [#896](https://github.com/holistics/dbml/pull/896) chore(deps): bump yaml from 1.10.2 to 1.10.3 in /dbml-homepage ([@dependabot[bot]](https://github.com/apps/dependabot))
 
-#### Committers: 1
+#### Committers: 2
 - Huy Do Nguyen An ([@huydo862003](https://github.com/huydo862003))
 - Rayan Salhab ([@cyphercodes](https://github.com/cyphercodes))
 
