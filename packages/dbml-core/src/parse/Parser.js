@@ -14,8 +14,9 @@ class Parser {
     this.DBMLCompiler = new Compiler(this.layout);
   }
 
-  static parseJSONToDatabase (rawDatabase) {
+  static parseJSONToDatabase (rawDatabase, { overrideCardinality = false } = {}) {
     const database = new Database(rawDatabase);
+    if (overrideCardinality) database.adjustCardinalitiesFromColumns();
     return database;
   }
 
@@ -121,25 +122,31 @@ class Parser {
   parse (str, format) {
     try {
       let rawDatabase = {};
+      let overrideCardinality = false;
       switch (format) {
         case 'mysql':
           rawDatabase = Parser.parseMySQLToJSONv2(str);
+          overrideCardinality = true;
           break;
 
         case 'mysqlLegacy':
           rawDatabase = Parser.parseMySQLToJSON(str);
+          overrideCardinality = true;
           break;
 
         case 'postgres':
           rawDatabase = Parser.parsePostgresToJSONv2(str);
+          overrideCardinality = true;
           break;
 
         case 'snowflake':
           rawDatabase = Parser.parseSnowflakeToJSON(str);
+          overrideCardinality = true;
           break;
 
         case 'postgresLegacy':
           rawDatabase = Parser.parsePostgresToJSON(str);
+          overrideCardinality = true;
           break;
 
         case 'dbml':
@@ -152,18 +159,22 @@ class Parser {
 
         case 'schemarb':
           rawDatabase = Parser.parseSchemaRbToJSON(str);
+          overrideCardinality = true;
           break;
 
         case 'mssqlLegacy':
           rawDatabase = Parser.parseMSSQLToJSON(str);
+          overrideCardinality = true;
           break;
 
         case 'mssql':
           rawDatabase = Parser.parseMSSQLToJSONv2(str);
+          overrideCardinality = true;
           break;
 
         case 'oracle':
           rawDatabase = Parser.parseOracleToJSON(str);
+          overrideCardinality = true;
           break;
 
         case 'json':
@@ -178,7 +189,7 @@ class Parser {
           break;
       }
 
-      const schema = Parser.parseJSONToDatabase(rawDatabase);
+      const schema = Parser.parseJSONToDatabase(rawDatabase, { overrideCardinality });
       return schema;
     } catch (diags) {
       throw CompilerError.create(diags);

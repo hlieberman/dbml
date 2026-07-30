@@ -224,23 +224,21 @@ Table users {
 // The space after '<' is optional
 ```
 
-There are 4 types of relationships: **one-to-one**, **one-to-many**, **many-to-one** and **many-to-many**
+There are 4 main types of relationships: **one-to-one**, **one-to-many**, **many-to-one** and **many-to-many**
 
 - `<`: one-to-many. E.g: `users.id < posts.user_id`
 - `>`: many-to-one. E.g: `posts.user_id > users.id`
 - `-`: one-to-one. E.g: `users.id - user_infos.user_id`
 - `<>`: many-to-many. E.g: `authors.id <> books.id`
 
-**Zero-to-(one/many)** or **(one/many)-to-zero** relationships will be automatically detected when you combine the relationship with foreign key's nullable constraint. Like this example:
-```text
-Table follows {
-  following_user_id int [ref: > users.id] // many-to-zero
-  followed_user_id int [ref: > users.id, null] // many-to-zero
-}
+Each operator can be augmented with `?` on either side to make that side **optional** — meaning the FK column is nullable and rows don't have to match.
 
+For example, `>?` means the referenced side is optional, `?>` means the source side is optional. This works with all operators.
+
+```text
 Table posts {
   id int [pk]
-  user_id int [ref: > users.id, not null] // many-to-one
+  user_id int [ref: >? users.id]   // post may have no user
 }
 ```
 

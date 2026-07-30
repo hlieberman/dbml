@@ -1,4 +1,5 @@
 import { NONE_COLOR, NUMERIC_LITERAL_PREFIX } from '@/constants';
+import { RELATIONSHIP_OPS } from '@/core/types/relation';
 import { CompileError, CompileErrorCode } from '@/core/types/errors';
 import {
   ArrayNode,
@@ -85,7 +86,7 @@ export function isValidPartialInjection (
 }
 
 export function isRelationshipOp (op?: string): boolean {
-  return op === '-' || op === '<>' || op === '>' || op === '<';
+  return op !== undefined && (RELATIONSHIP_OPS as ReadonlyMap<string, unknown>).has(op);
 }
 
 export function isValidHexColor (value?: SyntaxNode): value is PrimaryExpressionNode & { expression: LiteralNode & { literal: { kind: SyntaxTokenKind.COLOR_LITERAL } } } {

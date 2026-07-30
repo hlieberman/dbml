@@ -1,6 +1,6 @@
 import type Compiler from '@/compiler';
 import { getMemberChain } from '@/core/parser/utils';
-import type { Filepath, ProgramSymbol, RelationCardinality } from '@/core/types';
+import type { Filepath, ProgramSymbol } from '@/core/types';
 import { UNHANDLED } from '@/core/types/module';
 import {
   InfixExpressionNode, PostfixExpressionNode, PrefixExpressionNode, PrimaryExpressionNode, SyntaxNode, TupleExpressionNode, VariableNode,
@@ -41,6 +41,11 @@ export function getNodeMemberSymbols (compiler: Compiler, node: SyntaxNode): Rep
           ...report.getWarnings(),
           ...(symbol.hasValue(UNHANDLED) ? [] : symbol.getWarnings()),
           ...(nestedSymbols.hasValue(UNHANDLED) ? [] : nestedSymbols.getWarnings()),
+        ],
+        [
+          ...report.getInfos(),
+          ...(symbol.hasValue(UNHANDLED) ? [] : symbol.getInfos()),
+          ...(nestedSymbols.hasValue(UNHANDLED) ? [] : nestedSymbols.getInfos()),
         ],
       );
     },
@@ -109,35 +114,6 @@ export function nodeRefereeOfLeftExpression (compiler: Compiler, node: SyntaxNod
     leftExpr = leftExpr.rightExpression;
   }
   return compiler.nodeReferee(leftExpr).getFiltered(UNHANDLED) ?? undefined;
-}
-
-export function getMultiplicities (
-  op: string,
-): [RelationCardinality, RelationCardinality] | undefined {
-  switch (op) {
-    case '<':
-      return [
-        '1',
-        '*',
-      ];
-    case '<>':
-      return [
-        '*',
-        '*',
-      ];
-    case '>':
-      return [
-        '*',
-        '1',
-      ];
-    case '-':
-      return [
-        '1',
-        '1',
-      ];
-    default:
-      return undefined;
-  }
 }
 
 export function getDefaultSchemaSymbol (compiler: Compiler, globalSymbol: NodeSymbol): NodeSymbol | undefined {
