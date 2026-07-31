@@ -1,3 +1,12 @@
+## v9.1.1 (2026-07-31)
+
+#### :bug: Bug Fix
+* `dbml-core`, `dbml-parse`
+  * [#948](https://github.com/holistics/dbml/pull/948) Handle inline ref in partial table injections ([@huydo862003](https://github.com/huydo862003))
+
+#### Committers: 1
+- Huy Do Nguyen An ([@huydo862003](https://github.com/huydo862003))
+
 ## v9.1.0 (2026-07-31)
 
 #### :rocket: New Feature
