@@ -1,12 +1,6 @@
-import {
-  describe, expect, test,
-} from 'vitest';
-import {
-  SyntaxTokenKind, isTriviaToken,
-} from '@/core/types/tokens';
-import {
-  lex,
-} from '@tests/utils';
+import { describe, expect, test } from 'vitest';
+import { SyntaxTokenKind, isTriviaToken } from '@/core/types/tokens';
+import { lex } from '@tests/utils';
 
 function getTokens (source: string) {
   return lex(source).getValue().filter((t) => !isTriviaToken(t) && t.kind !== SyntaxTokenKind.EOF);
@@ -14,10 +8,22 @@ function getTokens (source: string) {
 
 describe('[example] optional ref operators', () => {
   test.each([
-    '-', '-?', '?-', '?-?',
-    '>', '>?', '?>', '?>?',
-    '<', '<?', '?<', '?<?',
-    '<>', '<>?', '?<>', '?<>?',
+    '-',
+    '-?',
+    '?-',
+    '?-?',
+    '>',
+    '>?',
+    '?>',
+    '?>?',
+    '<',
+    '<?',
+    '?<',
+    '?<?',
+    '<>',
+    '<>?',
+    '?<>',
+    '?<>?',
   ])('should tokenize %s as a single operator', (op) => {
     const tokens = getTokens(op);
 
@@ -32,10 +38,22 @@ describe('[example] optional ref operators', () => {
 
     expect(tokens).toHaveLength(16);
     expect(tokens.map((t) => t.value)).toEqual([
-      '-', '-?', '?-', '?-?',
-      '>', '>?', '?>', '?>?',
-      '<', '<?', '?<', '?<?',
-      '<>', '<>?', '?<>', '?<>?',
+      '-',
+      '-?',
+      '?-',
+      '?-?',
+      '>',
+      '>?',
+      '?>',
+      '?>?',
+      '<',
+      '<?',
+      '?<',
+      '?<?',
+      '<>',
+      '<>?',
+      '?<>',
+      '?<>?',
     ]);
   });
 

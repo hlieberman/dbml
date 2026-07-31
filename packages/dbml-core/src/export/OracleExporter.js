@@ -6,7 +6,9 @@ import {
   isNumericType,
   isStringType,
 } from '@dbml/parse';
-import { concat, flatten, forEach, isEmpty } from 'lodash-es';
+import {
+  concat, flatten, forEach, isEmpty,
+} from 'lodash-es';
 import {
   buildJunctionFields1,
   buildJunctionFields2,
