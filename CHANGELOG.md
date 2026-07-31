@@ -1,3 +1,12 @@
+## v9.1.0 (2026-07-31)
+
+#### :rocket: New Feature
+* `dbml-cli`, `dbml-connector`, `dbml-core`, `dbml-parse`
+  * [#932](https://github.com/holistics/dbml/pull/932) [DBX-6933] Feat: Support custom metadata element ([@xuantho573](https://github.com/xuantho573))
+
+#### Committers: 1
+- Tho Nguyen Xuan ([@xuantho573](https://github.com/xuantho573))
+
 ## v9.0.0 (2026-07-30)
 
 #### :boom: Breaking Change
