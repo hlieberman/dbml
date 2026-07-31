@@ -84,6 +84,7 @@ export {
   type ElementRef,
   type FilterConfig,
   type DiagramView,
+  type CustomMetadata,
 } from '@/core/types/schemaJson';
 
 export {

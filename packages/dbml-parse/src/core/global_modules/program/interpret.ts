@@ -6,7 +6,10 @@ import { UNHANDLED } from '@/core/types/module';
 import { ProgramNode } from '@/core/types/nodes';
 import Report from '@/core/types/report';
 import type {
-  Alias, Database, DiagramView, Enum, Note, Project, Ref, RefEndpoint, SchemaElement, Table, TableGroup, TablePartial, TableRecord,
+  Alias, Database, DiagramView, Enum,
+  Note, Project, Ref,
+  RefEndpoint, SchemaElement, Table,
+  TableGroup, TablePartial, TableRecord,
 } from '@/core/types/schemaJson';
 import { AliasKind } from '@/core/types/schemaJson';
 import {
@@ -242,7 +245,11 @@ export default class ProgramInterpreter {
         case MetadataKind.Project:
           this.db.project = value as Project;
           break;
-        default: break;
+
+        // Handled inside each element
+        case MetadataKind.MetadataElement:
+        default:
+          break;
       }
     }
   }
