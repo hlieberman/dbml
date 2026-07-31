@@ -1,4 +1,5 @@
 import { get, isNil } from 'lodash-es';
+import { getMultiplicities } from '@dbml/parse';
 import Check from './check';
 import { DEFAULT_SCHEMA_NAME } from './config';
 import Element from './element';
@@ -188,19 +189,20 @@ class Table extends Element {
           // convert inline_refs from injected fields to refs
           if (rawField.inline_refs) {
             rawField.inline_refs.forEach((iref: any) => {
+              const multiplicities = getMultiplicities(iref.relation) || ['*', '*'];
               const ref = {
                 token: rawField.token,
                 endpoints: [{
                   tableName: this.name,
                   schemaName: this.schema?.name,
                   fieldNames: [rawField.name],
-                  relation: ['-', '<'].includes(iref.relation) ? '1' : '*',
+                  relation: multiplicities[0],
                   token: rawField.token,
                 }, {
                   tableName: iref.tableName,
                   schemaName: iref.schemaName,
                   fieldNames: iref.fieldNames,
-                  relation: ['-', '>'].includes(iref.relation) ? '1' : '*',
+                  relation: multiplicities[1],
                   token: iref.token,
                 }],
                 injectedPartial: tablePartial,

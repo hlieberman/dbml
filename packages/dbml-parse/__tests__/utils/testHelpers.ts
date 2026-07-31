@@ -1,9 +1,13 @@
 import fs from 'node:fs';
 import { NodeSymbol, SchemaSymbol, SymbolKind } from '@/core/types/symbol';
 import { SyntaxToken } from '@/core/types/tokens';
-import { ElementDeclarationNode, FunctionApplicationNode, FunctionExpressionNode, LiteralNode, PrimaryExpressionNode, ProgramNode, SyntaxNode, VariableNode } from '@/core/types/nodes';
+import {
+  ElementDeclarationNode, FunctionApplicationNode, FunctionExpressionNode, LiteralNode, PrimaryExpressionNode, ProgramNode, SyntaxNode, VariableNode,
+} from '@/core/types/nodes';
 import { getElementNameString } from '@/core/utils/expression';
-import { CompileError, CompileErrorCode, CompileWarning, CompileInfo } from '@/core/types/errors';
+import {
+  CompileError, CompileErrorCode, CompileWarning, CompileInfo,
+} from '@/core/types/errors';
 import type Compiler from '@/compiler';
 import { UNHANDLED } from '@/core/types/module';
 import { Filepath, SchemaElement, TokenPosition } from '@/core/types';

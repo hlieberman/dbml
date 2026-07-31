@@ -1,4 +1,6 @@
-import { Compiler, DEFAULT_ENTRY, Filepath, MemoryProjectLayout } from '@dbml/parse';
+import {
+  Compiler, DEFAULT_ENTRY, Filepath, MemoryProjectLayout,
+} from '@dbml/parse';
 import Database from '../model_structure/database';
 import { parse } from './ANTLR/ASTGeneration';
 import dbmlParser from './deprecated/dbmlParser.cjs';
