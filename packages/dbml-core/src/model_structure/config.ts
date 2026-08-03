@@ -5,3 +5,4 @@ export const ENUM = 'enum';
 export const REF = 'ref';
 export const DEP = 'dep';
 export const TABLE_GROUP = 'table_group';
+export const METADATA = 'metadata';

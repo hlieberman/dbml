@@ -9,7 +9,7 @@ import {
 } from '../AST';
 import { COLUMN_CONSTRAINT_KIND, DATA_TYPE, TABLE_CONSTRAINT_KIND } from '../constants';
 import { getOriginalText } from '../helpers';
-import { normalizeQualifiedName } from '@dbml/parse';
+import { CARDINALITY_MANY, CARDINALITY_MAYBE, normalizeQualifiedName } from '@dbml/parse';
 
 const ADD_DESCRIPTION_FUNCTION_NAME = 'sp_addextendedproperty';
 
@@ -820,13 +820,13 @@ export default class MssqlASTGen extends TSqlParserVisitor {
               tableName: null,
               schemaName: null,
               fieldNames: null,
-              relation: '*',
+              relation: CARDINALITY_MANY,
             },
             {
               tableName: refTableName,
               schemaName: refSchemaName,
               fieldNames,
-              relation: '1',
+              relation: CARDINALITY_MAYBE,
             },
           ],
           onDelete,

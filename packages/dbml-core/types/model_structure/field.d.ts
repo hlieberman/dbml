@@ -7,12 +7,13 @@ import Enum from './enum';
 import Table from './table';
 import TablePartial from './tablePartial';
 import Check from './check';
+import type { CustomMetadata, RelationshipOp } from '@dbml/parse';
 
 export interface InlineRef {
     schemaName: string | null;
     tableName: string;
     fieldNames: string[];
-    relation: '>' | '<' | '-' | '<>';
+    relation: RelationshipOp;
     token: Token;
 }
 
@@ -34,6 +35,7 @@ export interface RawField {
     increment: boolean;
     checks?: any[];
     table: Table;
+    metadata?: CustomMetadata;
 }
 
 declare class Field extends Element {
@@ -54,7 +56,9 @@ declare class Field extends Element {
     _enum: Enum;
     injectedPartial?: TablePartial;
     injectedToken: Token;
-    constructor({ name, type, unique, pk, token, not_null, note, dbdefault, increment, checks, table }: RawField);
+    metadata: CustomMetadata;
+    
+    constructor({ name, type, unique, pk, token, not_null, note, dbdefault, increment, checks, table, metadata }: RawField);
     generateId(): void;
     pushEndpoint(endpoint: any): void;
     pushDepEdge(depEdge: DepEdge): void;
@@ -89,6 +93,7 @@ declare class Field extends Element {
         increment: boolean;
         injectedPartialId?: number;
         checkIds: number[];
+        metadata: CustomMetadata;
     };
     normalize(model: NormalizedModel): void;
 }
@@ -115,6 +120,7 @@ export interface NormalizedField {
     enumId: number | null;
     injectedPartialId: number | null;
     checkIds: number[];
+    metadata: CustomMetadata;
 }
 
 export interface NormalizedFieldIdMap {

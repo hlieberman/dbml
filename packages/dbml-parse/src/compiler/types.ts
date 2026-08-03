@@ -13,4 +13,5 @@ export const enum ScopeKind {
   CHECKS,
   RECORDS,
   DIAGRAMVIEW,
+  METADATA,
 }

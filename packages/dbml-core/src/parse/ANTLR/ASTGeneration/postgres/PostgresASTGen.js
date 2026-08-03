@@ -10,7 +10,7 @@ import {
 } from '../constants';
 import { getOriginalText } from '../helpers';
 import { DEFAULT_SCHEMA_NAME } from '../../../../model_structure/config';
-import { normalizeQualifiedName } from '@dbml/parse';
+import { CARDINALITY_MANY, CARDINALITY_MAYBE, normalizeQualifiedName } from '@dbml/parse';
 
 const COMMAND_KIND = {
   REF: 'ref',
@@ -266,12 +266,12 @@ export default class PostgresASTGen extends PostgreSQLParserVisitor {
             tableName: null,
             schemaName: null,
             fieldNames: firstFieldNames,
-            relation: '*',
+            relation: CARDINALITY_MANY,
           }, {
             tableName: refTableName,
             schemaName: refSchemaName,
             fieldNames: secondFieldNames,
-            relation: '1',
+            relation: CARDINALITY_MAYBE,
           }],
           onDelete: actions.onDelete,
           onUpdate: actions.onUpdate,
@@ -447,12 +447,12 @@ export default class PostgresASTGen extends PostgreSQLParserVisitor {
             tableName: null,
             schemaName: null,
             fieldNames: null,
-            relation: '*',
+            relation: CARDINALITY_MANY,
           }, {
             tableName: refTableName,
             schemaName: refSchemaName,
             fieldNames: secondFieldNames,
-            relation: '1',
+            relation: CARDINALITY_MAYBE,
           }],
           onDelete: actions.onDelete,
           onUpdate: actions.onUpdate,

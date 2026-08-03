@@ -17,7 +17,7 @@ export default class DbState {
   recordId = 1;
   tablePartialId = 1;
 
-  generateId (el: keyof DbState): number {
+  generateId (el: Exclude<keyof DbState, 'generateId'>): number {
     const id = this[el] as number;
     (this[el] as number) += 1;
     return id;

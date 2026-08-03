@@ -11,7 +11,7 @@ import {
 } from '../constants';
 import { getOriginalText } from '../helpers';
 import { DEFAULT_SCHEMA_NAME } from '../../../../model_structure/config';
-import { normalizeQualifiedName } from '@dbml/parse';
+import { CARDINALITY_MANY, CARDINALITY_MAYBE, normalizeQualifiedName } from '@dbml/parse';
 
 const TABLE_OPTIONS_KIND = {
   NOTE: 'note',
@@ -773,14 +773,14 @@ export default class MySQLASTGen extends MySQLParserVisitor {
       tableName: null,
       schemaName: null,
       fieldNames: null,
-      relation: '*',
+      relation: CARDINALITY_MANY,
     });
 
     const endpoint1 = new Endpoint({
       tableName,
       schemaName,
       fieldNames,
-      relation: '1',
+      relation: CARDINALITY_MAYBE,
     });
 
     return new Ref({

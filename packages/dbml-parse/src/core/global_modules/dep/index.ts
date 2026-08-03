@@ -19,7 +19,7 @@ import { SymbolKind, type NodeSymbol } from '@/core/types/symbol';
 import type { SyntaxToken } from '@/core/types/tokens';
 import { extractStringFromIdentifierStream, extractVarNameFromPrimaryVariable, getBody } from '@/core/utils/expression';
 import { isAccessExpression, isElementNode, isExpressionAVariableNode } from '@/core/utils/validate';
-import { getDefaultSchemaSymbol } from '../ref';
+import { getDefaultSchemaSymbol } from '../utils';
 import { nodeRefereeOfLeftExpression } from '../utils';
 import type { GlobalModule } from '../types';
 import DepBinder from './bind';

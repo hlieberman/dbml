@@ -1,3 +1,8 @@
+/**
+ * General-purpose setting edit utilities for any element declaration.
+ * Produces TextEdits for adding, updating, and removing settings in [...] blocks.
+ */
+
 import {
   FunctionApplicationNode, ListExpressionNode, AttributeNode, ElementDeclarationNode,
 } from '@/core/types/nodes';

@@ -9,7 +9,7 @@ import { SettingName } from '@/core/types/keywords';
 import { DEP_DOWNSTREAM, DEP_UPSTREAM } from '@/core/types/schemaJson';
 import { destructureComplexVariableTuple } from '@/core/utils/expression';
 import {
-  Settings, aggregateSettingList, isSimpleName, isValidColor, isExpressionAQuotedString,
+  Settings, aggregateSettingList, isSimpleName, isValidHexColor, isExpressionAQuotedString,
   isExpressionASignedNumberExpression,
 } from '@/core/utils/validate';
 
@@ -150,7 +150,7 @@ export default class DepValidator {
 
       switch (key) {
         case SettingName.Color:
-          if (!isValidColor(subBody.callee)) {
+          if (!isValidHexColor(subBody.callee)) {
             return [
               new CompileError(CompileErrorCode.INVALID_SETTINGS, 'Invalid color value. Expected a hex color (e.g. #fff or #aabbcc)', sub),
             ];
@@ -165,7 +165,7 @@ export default class DepValidator {
           return [];
         default:
           if (!isExpressionAQuotedString(subBody.callee)
-            && !isValidColor(subBody.callee)
+            && !isValidHexColor(subBody.callee)
             && !isExpressionASignedNumberExpression(subBody.callee)
             && !isSimpleName(subBody.callee)) {
             return [
@@ -192,7 +192,7 @@ export function validateDepSettings (settings: ListExpressionNode): Report<Setti
     for (const attr of attrs) {
       switch (name) {
         case SettingName.Color:
-          if (!isValidColor(attr.value)) {
+          if (!isValidHexColor(attr.value)) {
             errors.push(new CompileError(CompileErrorCode.INVALID_SETTINGS, 'Invalid color value. Expected a hex color (e.g. #fff or #aabbcc)', attr));
           }
           break;
@@ -204,7 +204,7 @@ export function validateDepSettings (settings: ListExpressionNode): Report<Setti
         default:
           if (attr.value
             && !isExpressionAQuotedString(attr.value)
-            && !isValidColor(attr.value)
+            && !isValidHexColor(attr.value)
             && !isExpressionASignedNumberExpression(attr.value)
             && !isSimpleName(attr.value)) {
             errors.push(new CompileError(CompileErrorCode.INVALID_SETTINGS, `Invalid value for setting '${name}'. Expected a string, number, color, or identifier`, attr));
