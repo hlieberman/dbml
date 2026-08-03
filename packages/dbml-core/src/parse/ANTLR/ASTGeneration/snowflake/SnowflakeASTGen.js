@@ -1,7 +1,11 @@
 import { flatten, flattenDepth, isEmpty } from 'lodash-es';
 import SnowflakeParserVisitor from '../../parsers/snowflake/SnowflakeParserVisitor';
-import { Enum, Field, Index, Table, TableRecord } from '../AST';
-import { COLUMN_CONSTRAINT_KIND, CONSTRAINT_TYPE, DATA_TYPE, TABLE_CONSTRAINT_KIND } from '../constants';
+import {
+  Enum, Field, Index, Table, TableRecord,
+} from '../AST';
+import {
+  COLUMN_CONSTRAINT_KIND, CONSTRAINT_TYPE, DATA_TYPE, TABLE_CONSTRAINT_KIND,
+} from '../constants';
 import { getOriginalText } from '../helpers';
 import { CARDINALITY_MANY, CARDINALITY_MAYBE } from '@dbml/parse';
 

@@ -12,7 +12,9 @@ import StickyNote from './stickyNote';
 import Table from './table';
 import TableGroup from './tableGroup';
 import TablePartial from './tablePartial';
-import type { RawDatabase, TableRecord, RawTableRecord, NormalizedModel } from '../../types/model_structure/database';
+import type {
+  RawDatabase, TableRecord, RawTableRecord, NormalizedModel,
+} from '../../types/model_structure/database';
 import type { Token } from '../../types/model_structure/element';
 import type { DiagramView } from '@dbml/parse';
 
@@ -83,7 +85,6 @@ class Database extends Element {
       if (schema.refs.some((r) => r.equals(ref as any))) return;
       schema.pushRef(ref);
     });
-
   }
 
   private generateId (): void {
