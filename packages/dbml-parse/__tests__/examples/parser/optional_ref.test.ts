@@ -1,16 +1,24 @@
-import {
-  describe, expect, test,
-} from 'vitest';
-import {
-  parse,
-} from '@tests/utils';
+import { describe, expect, test } from 'vitest';
+import { parse } from '@tests/utils';
 
 describe('[example] optional ref parsing', () => {
   test.each([
-    '-', '-?', '?-', '?-?',
-    '>', '>?', '?>', '?>?',
-    '<', '<?', '?<', '?<?',
-    '<>', '<>?', '?<>', '?<>?',
+    '-',
+    '-?',
+    '?-',
+    '?-?',
+    '>',
+    '>?',
+    '?>',
+    '?>?',
+    '<',
+    '<?',
+    '?<',
+    '?<?',
+    '<>',
+    '<>?',
+    '?<>',
+    '?<>?',
   ])('should parse standalone ref with operator %s without errors', (op) => {
     const source = `
       Table users { id int }
@@ -22,10 +30,22 @@ describe('[example] optional ref parsing', () => {
   });
 
   test.each([
-    '>', '>?', '?>', '?>?',
-    '<', '<?', '?<', '?<?',
-    '-', '-?', '?-', '?-?',
-    '<>', '<>?', '?<>', '?<>?',
+    '>',
+    '>?',
+    '?>',
+    '?>?',
+    '<',
+    '<?',
+    '?<',
+    '?<?',
+    '-',
+    '-?',
+    '?-',
+    '?-?',
+    '<>',
+    '<>?',
+    '?<>',
+    '?<>?',
   ])('should parse inline ref with operator %s without errors', (op) => {
     const source = `
       Table users { id int }

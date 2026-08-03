@@ -124,6 +124,4 @@ const generateDatabase = (schemaJson) => {
   }
 };
 
-export {
-  generateDatabase,
-};
+export { generateDatabase };

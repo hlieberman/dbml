@@ -151,6 +151,46 @@ Ref:"posts"."user_id" ?<? "users"."id"`);
     });
   });
 
+  describe('table partial refs', () => {
+    test('should preserve optional ref from table partial (nullable FK)', () => {
+      const input = `
+TablePartial auditable {
+  created_by int [ref: >? users.id]
+}
+Table users {
+  id int [pk]
+}
+Table posts {
+  id int [pk]
+  ~auditable
+}
+      `.trim();
+      const res = exporter.export(input, 'dbml');
+      // >? should export as ?< (flipped direction, optional on the one side)
+      expect(res.trim()).toContain('?<');
+      // Should NOT become many-to-many (<>)
+      expect(res.trim()).not.toContain('<>');
+    });
+
+    test('should preserve required ref from table partial', () => {
+      const input = `
+TablePartial auditable {
+  created_by int [ref: > users.id]
+}
+Table users {
+  id int [pk]
+}
+Table posts {
+  id int [pk]
+  ~auditable
+}
+      `.trim();
+      const res = exporter.export(input, 'dbml');
+      // > should export as < (flipped direction, required many-to-one)
+      expect(res.trim()).toMatch(/"users"\."id" < "posts"\."created_by"/);
+    });
+  });
+
   describe('sql exporters', () => {
     test('mysql exporter should produce FK constraint for optional ref', () => {
       const input = `

@@ -40,6 +40,7 @@ export {
   tryExtractEnum,
   addDoubleQuoteIfNeeded,
   formatRecordValue,
+  dbmlMonarchTokensProvider,
   DEFAULT_ENTRY,
   Filepath,
   CARDINALITY_ONE,
@@ -65,6 +66,7 @@ export type {
   DiagramViewSyncOperation,
   DiagramViewBlock,
   TextEdit,
+  CustomMetadata,
   RelationCardinality,
   RelationshipOp,
 } from '@dbml/parse';

@@ -1,6 +1,4 @@
-import {
-  describe, expect, test,
-} from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { interpret, parse } from '@tests/utils';
 import { ElementDeclarationNode } from '@/core/types/nodes';
 import { addSettingEdit } from '@/core/utils/setting';
