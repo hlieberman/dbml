@@ -1,9 +1,5 @@
-import {
-  describe, expect, test,
-} from 'vitest';
-import {
-  analyze, interpret,
-} from '@tests/utils';
+import { describe, expect, test } from 'vitest';
+import { analyze, interpret } from '@tests/utils';
 
 describe('[example] nullable column with required operator', () => {
   test('all columns nullable should emit info', () => {
@@ -63,10 +59,22 @@ describe('[example] nullable column with required operator', () => {
 
 describe('[example] optional ref validation', () => {
   test.each([
-    '-', '-?', '?-', '?-?',
-    '>', '>?', '?>', '?>?',
-    '<', '<?', '?<', '?<?',
-    '<>', '<>?', '?<>', '?<>?',
+    '-',
+    '-?',
+    '?-',
+    '?-?',
+    '>',
+    '>?',
+    '?>',
+    '?>?',
+    '<',
+    '<?',
+    '?<',
+    '?<?',
+    '<>',
+    '<>?',
+    '?<>',
+    '?<>?',
   ])('should accept standalone ref with operator %s', (op) => {
     const source = `
       Table users { id int }
@@ -78,10 +86,22 @@ describe('[example] optional ref validation', () => {
   });
 
   test.each([
-    '>', '>?', '?>', '?>?',
-    '<', '<?', '?<', '?<?',
-    '-', '-?', '?-', '?-?',
-    '<>', '<>?', '?<>', '?<>?',
+    '>',
+    '>?',
+    '?>',
+    '?>?',
+    '<',
+    '<?',
+    '?<',
+    '?<?',
+    '-',
+    '-?',
+    '?-',
+    '?-?',
+    '<>',
+    '<>?',
+    '?<>',
+    '?<>?',
   ])('should accept inline ref with operator %s', (op) => {
     const source = `
       Table users { id int }
