@@ -103,9 +103,9 @@ function validateForeignKey (
 
   return [
     // card2 constrains table1's rows
-    ...(skipTable1 ? [] : validateEndpoint(compiler, table1, endpoint1, table2, endpoint2, rawEndpoint2.relation, filepath)),
+    ...(skipTable1 ? [] : validateEndpoint(compiler, table1, endpoint1, table2, endpoint2, rawEndpoint1.relation, rawEndpoint2.relation, filepath)),
     // card1 constrains table2's rows
-    ...(skipTable2 ? [] : validateEndpoint(compiler, table2, endpoint2, table1, endpoint1, rawEndpoint1.relation, filepath)),
+    ...(skipTable2 ? [] : validateEndpoint(compiler, table2, endpoint2, table1, endpoint1, rawEndpoint2.relation, rawEndpoint1.relation, filepath)),
   ];
 }
 
@@ -113,19 +113,22 @@ function validateForeignKey (
 //   - right min = 0  -> left allows NULL
 //   - right min >= 1 -> left must not be NULL
 //   - right max = 1  -> left must map to exactly 1 right row (FK existence)
-//   - right max = *  -> no FK constraint
+//   - right max = * and left min >= 1 -> left must exist in right
+//   - right max = * and left min = 0 and left max = * -> no FK existence constraint
 function validateEndpoint (
   compiler: Compiler,
   leftTable: TableInfo,
   leftEndpoint: ColumnSymbol[],
   rightTable: TableInfo,
   rightEndpoint: ColumnSymbol[],
-  rightCard: RelationCardinality, // This will constrains the left table's records
+  leftCard: RelationCardinality,
+  rightCard: RelationCardinality,
   filepath: Filepath,
 ): CompileWarning[] {
   if (!leftTable.record || isEmpty(leftTable.record.values)) return [];
 
-  const { min: rightMin } = parseCardinality(rightCard);
+  const { min: leftMin, max: leftMax } = parseCardinality(leftCard);
+  const { min: rightMin, max: rightMax } = parseCardinality(rightCard);
 
   const leftColumnNames = compact(leftEndpoint.map((c) => c.name));
   const rightColumnNames = compact(rightEndpoint.map((c) => c.name));
@@ -158,8 +161,10 @@ function validateEndpoint (
     }
 
     // right max = 1 -> non-null left value must map to exactly 1 right row
-    // right max = * -> non-null left value must exist in right
-    // Both cases: left value must exist in right values
+    // right max = * and left min = 0 and left max = * -> no FK existence constraint
+    // right max = * and not above -> non-null left value must exist in right
+    if (rightMax === '*' && leftMin === 0 && leftMax === '*') return [];
+
     const fkValue = extractKeyValueWithDefault(compiler, row, leftEndpoint);
     if (validFkValues.has(fkValue)) return [];
 
