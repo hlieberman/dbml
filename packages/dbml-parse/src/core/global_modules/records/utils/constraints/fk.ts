@@ -122,7 +122,7 @@ function validateEndpoint (
   rightTable: TableInfo,
   rightEndpoint: ColumnSymbol[],
   leftCard: RelationCardinality,
-  rightCard: RelationCardinality,
+  rightCard: RelationCardinality, // This will constrains the left table's records
   filepath: Filepath,
 ): CompileWarning[] {
   if (!leftTable.record || isEmpty(leftTable.record.values)) return [];
