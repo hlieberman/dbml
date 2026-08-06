@@ -1,5 +1,5 @@
 import type Compiler from '@/compiler';
-import { CompileErrorCode, CompileInfo } from '@/core/types/errors';
+import { CompileInfo } from '@/core/types/errors';
 import type { QuickFix } from '@/core/types/errors';
 import type { SyntaxToken } from '@/core/types/tokens';
 import type { SyntaxNode } from '@/core/types/nodes';
@@ -15,6 +15,12 @@ import {
   CARDINALITY_ONE,
 } from '@/core/types/relation';
 import { addSettingEdit, removeSettingEdit } from '@/core/utils/setting';
+import {
+  refNullableMismatch,
+  refNotNullMismatch,
+  refUniqueMismatch,
+  refNonUniqueMismatch,
+} from '@/core/utils/diagnostics_reporter';
 import type { RefMetadata, PartialRefMetadata } from '@/core/types/symbol/metadata';
 
 // Check consistency between a ref's cardinality and column constraints for one side.
@@ -62,11 +68,16 @@ export function validateCardinality (
 
   const infos: CompileInfo[] = [];
 
-  function pushInfos (node: SyntaxNode | SyntaxToken, columns: ColumnSymbol[], msg: string, fixes: QuickFix[]) {
-    infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, node, { quickFixes: fixes }));
+  // Push a diagnostic for the node and for each column declaration that differs from the node.
+  function pushDiag (
+    node: SyntaxNode | SyntaxToken,
+    columns: ColumnSymbol[],
+    createDiag: (target: SyntaxNode | SyntaxToken) => CompileInfo,
+  ) {
+    infos.push(createDiag(node));
     for (const col of columns) {
-      if (col.declaration) {
-        infos.push(new CompileInfo(CompileErrorCode.INVALID_REF_RELATIONSHIP, msg, col.declaration, { quickFixes: fixes }));
+      if (col.declaration && col.declaration !== node) {
+        infos.push(createDiag(col.declaration));
       }
     }
   }
@@ -83,15 +94,18 @@ export function validateCardinality (
     const allOtherNullable = otherColumns.length > 0 && otherColumns.every((col) => col.nullable(compiler));
     if (allOtherNullable) {
       const qnames = otherColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
-      const msg = otherColumns.length === 1
-        ? `Column '${qnames}' is nullable but operator '${op}' requires it to be NOT NULL`
-        : `Columns (${qnames}) are all nullable but operator '${op}' requires at least one to be NOT NULL`;
       const fixes = [
         opToken && suggestChangeOp(opToken, makeCardinalityOptional(rawOwnCard), rawOtherCard, side, `Make '${qnames}' optional in the ref`),
         ...(allowOtherColFix ? otherColumns.map((col) => suggestMakeNotNull(col, compiler)).filter((f): f is QuickFix => !!f) : []),
       ].filter((f): f is QuickFix => !!f);
 
-      pushInfos(otherNode, otherColumns, msg, fixes);
+      pushDiag(otherNode, otherColumns, (target) =>
+        refNullableMismatch(compiler, target, {
+          relOp: op,
+          columns: otherColumns,
+          refNode: meta.declaration,
+          quickFixes: fixes,
+        }));
     }
   }
 
@@ -100,15 +114,18 @@ export function validateCardinality (
     const allOtherNotNull = otherColumns.length > 0 && otherColumns.every((col) => col.nullable(compiler) === false);
     if (allOtherNotNull) {
       const qnames = otherColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
-      const msg = otherColumns.length === 1
-        ? `Column '${qnames}' is NOT NULL but operator '${op}' allows it to be optional`
-        : `Columns (${qnames}) are NOT NULL but operator '${op}' allows them to be optional`;
       const fixes = [
         opToken && suggestChangeOp(opToken, makeCardinalityRequired(rawOwnCard), rawOtherCard, side, `Make '${qnames}' required in the ref`),
         ...(allowOtherColFix ? otherColumns.map((col) => suggestMakeNullable(col, compiler)).filter((f): f is QuickFix => !!f) : []),
       ].filter((f): f is QuickFix => !!f);
 
-      pushInfos(otherNode, otherColumns, msg, fixes);
+      pushDiag(otherNode, otherColumns, (target) =>
+        refNotNullMismatch(compiler, target, {
+          relOp: op,
+          columns: otherColumns,
+          refNode: meta.declaration,
+          quickFixes: fixes,
+        }));
     }
   }
 
@@ -117,28 +134,34 @@ export function validateCardinality (
   // card.max === *: if ownColumns are unique/pk, max should be 1.
   if (ownCard.max === '*' && isColumnsUnique(compiler, ownColumns)) {
     const qnames = ownColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
-    const msg = ownColumns.length === 1
-      ? `Column '${qnames}' is unique but operator '${op}' allows many`
-      : `Columns (${qnames}) have a unique index but operator '${op}' allows many`;
     const fixes = [
       opToken && suggestChangeOp(opToken, CARDINALITY_ONE, rawOtherCard, side, `Make '${qnames}' one in the ref`),
     ].filter((f): f is QuickFix => !!f);
 
-    pushInfos(ownNode, ownColumns, msg, fixes);
+    pushDiag(ownNode, ownColumns, (target) =>
+      refUniqueMismatch(compiler, target, {
+        relOp: op,
+        columns: ownColumns,
+        refNode: meta.declaration,
+        quickFixes: fixes,
+      }));
   }
 
   // card.max === 1: ownColumns should be unique/pk.
   if (ownCard.max === 1 && !isColumnsUnique(compiler, ownColumns)) {
     const qnames = ownColumns.map((c) => c.qualifiedName(compiler).join('.')).join(', ');
-    const msg = ownColumns.length === 1
-      ? `Column '${qnames}' should be unique or primary key for operator '${op}'`
-      : `Columns (${qnames}) should have a composite unique index for operator '${op}'`;
     const fixes = [
       opToken && suggestChangeOp(opToken, makeCardinalityMany(rawOwnCard), rawOtherCard, side, `Make '${qnames}' many in the ref`),
       allowOwnColFix && ownColumns.length === 1 && suggestMakeUnique(ownColumns[0], compiler),
     ].filter((f): f is QuickFix => !!f);
 
-    pushInfos(ownNode, ownColumns, msg, fixes);
+    pushDiag(ownNode, ownColumns, (target) =>
+      refNonUniqueMismatch(compiler, target, {
+        relOp: op,
+        columns: ownColumns,
+        refNode: meta.declaration,
+        quickFixes: fixes,
+      }));
   }
 
   return infos;

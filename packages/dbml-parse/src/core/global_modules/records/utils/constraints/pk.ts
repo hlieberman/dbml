@@ -2,7 +2,12 @@ import {
   compact, difference, flatMap, filter, groupBy, isEmpty, keyBy, partition,
 } from 'lodash-es';
 import type Compiler from '@/compiler/index';
-import { CompileErrorCode, CompileWarning } from '@/core/types/errors';
+import type { CompileInfo } from '@/core/types/errors';
+import {
+  recordsPkNull,
+  recordsPkDuplicate,
+  recordsPkMissing,
+} from '@/core/utils/diagnostics_reporter';
 import type { SyntaxNode } from '@/core/types/nodes';
 import type {
   Index,
@@ -11,20 +16,17 @@ import type {
 } from '@/core/types/schemaJson';
 import { TableSymbol, type ColumnSymbol } from '@/core/types/symbol';
 import {
-  createConstraintWarning,
+  resolveRecordValueNode,
   extractKeyValueWithDefault,
-  formatFullColumnNames,
   formatValues,
   getDiagnosticAnchorValues,
   hasNullWithoutDefaultInKey,
   toKeyedRows,
 } from './helper';
 
-const getConstraintType = (columnCount: number) =>
-  columnCount > 1 ? 'Composite PK' : 'PK';
 
 // Validate primary key constraints for a table's records.
-export function validatePrimaryKey (compiler: Compiler, tableSymbol: TableSymbol, recordBlock: SyntaxNode, record: TableRecord): CompileWarning[] {
+export function validatePrimaryKey (compiler: Compiler, tableSymbol: TableSymbol, recordBlock: SyntaxNode, record: TableRecord): CompileInfo[] {
   if (isEmpty(record.values)) return [];
 
   const pkConstraints = collectPkConstraints(tableSymbol, compiler);
@@ -42,7 +44,7 @@ function validatePkConstraint (
   recordBlock: SyntaxNode,
   pkColumnSymbols: ColumnSymbol[],
   record: TableRecord,
-): CompileWarning[] {
+): CompileInfo[] {
   const rows = toKeyedRows(record);
 
   const missingErrors = checkMissingPkColumns(compiler, tableSymbol, recordBlock, pkColumnSymbols, record);
@@ -61,7 +63,7 @@ function validatePkConstraint (
     (row) => hasNullWithoutDefaultInKey(compiler, row, nullCheckSymbols),
   );
 
-  const nullErrors = createNullErrors(compiler, tableSymbol, nullCheckSymbols.map((c) => c.name ?? ''), rowsWithNull);
+  const nullErrors = createNullErrors(compiler, tableSymbol, nullCheckSymbols, rowsWithNull);
 
   // If any PK column is auto-increment, the whole key is guaranteed unique
   const hasAutoIncrement = pkColumnSymbols.some((col) => col.increment(compiler));
@@ -80,19 +82,15 @@ function validatePkConstraint (
 function createNullErrors (
   compiler: Compiler,
   tableSymbol: TableSymbol,
-  pkColumns: string[],
+  pkColumnSymbols: ColumnSymbol[],
   rowsWithNull: Record<string, RecordValue>[],
-): CompileWarning[] {
+): CompileInfo[] {
   if (isEmpty(rowsWithNull)) return [];
 
-  const schemaName = tableSymbol.schema(compiler);
-  const tableName = tableSymbol.name ?? '';
-  const constraintType = getConstraintType(pkColumns.length);
-  const columnRef = formatFullColumnNames(schemaName, tableName, pkColumns);
-  const message = `NULL in ${constraintType}: ${columnRef} cannot be NULL`;
-
+  const pkColumns = pkColumnSymbols.map((c) => c.name ?? '');
   return flatMap(rowsWithNull, (row) =>
-    getDiagnosticAnchorValues(row, pkColumns).map((v) => createConstraintWarning(compiler, v, message)),
+    getDiagnosticAnchorValues(row, pkColumns).map((v) =>
+      recordsPkNull(compiler, resolveRecordValueNode(compiler, v), { table: tableSymbol, columns: pkColumnSymbols })),
   );
 }
 
@@ -103,24 +101,19 @@ function findDuplicateErrors (
   tableSymbol: TableSymbol,
   pkColumnSymbols: ColumnSymbol[],
   rows: Record<string, RecordValue>[],
-): CompileWarning[] {
+): CompileInfo[] {
   const pkColumns = pkColumnSymbols.map((c) => c.name ?? '');
-  const schemaName = tableSymbol.schema(compiler);
-  const tableName = tableSymbol.name ?? '';
 
   const rowsByKeyValue = groupBy(rows, (row) => extractKeyValueWithDefault(compiler, row, pkColumnSymbols));
   const duplicateGroups = filter(rowsByKeyValue, (group) => group.length > 1);
 
-  return flatMap(duplicateGroups, (duplicateRows) => {
-    const constraintType = getConstraintType(pkColumns.length);
-    const columnRef = formatFullColumnNames(schemaName, tableName, pkColumns);
-
-    return flatMap(duplicateRows, (row) => {
+  return flatMap(duplicateGroups, (duplicateRows) =>
+    flatMap(duplicateRows, (row) => {
       const valueStr = formatValues(compiler, row, pkColumnSymbols);
-      const message = `Duplicate ${constraintType}: ${columnRef} = ${valueStr}`;
-      return getDiagnosticAnchorValues(row, pkColumns).map((v) => createConstraintWarning(compiler, v, message));
-    });
-  });
+      return getDiagnosticAnchorValues(row, pkColumns).map((v) =>
+        recordsPkDuplicate(compiler, resolveRecordValueNode(compiler, v), { table: tableSymbol, columns: pkColumnSymbols, valueStr }));
+    }),
+  );
 }
 
 // Check if any PK columns are missing from the record column list.
@@ -131,31 +124,20 @@ function checkMissingPkColumns (
   recordBlock: SyntaxNode,
   pkColumnSymbols: ColumnSymbol[],
   record: TableRecord,
-): CompileWarning[] {
+): CompileInfo[] {
   const pkColumns = pkColumnSymbols.map((c) => c.name ?? '');
   const availableColumns = new Set(record.columns);
-  const schemaName = tableSymbol.schema(compiler);
-  const tableName = tableSymbol.name ?? '';
-
   const missingColumns = difference(pkColumns, Array.from(availableColumns));
   if (isEmpty(missingColumns)) return [];
 
   const missingSet = new Set(missingColumns);
   const missingSymbols = pkColumnSymbols.filter((c) => missingSet.has(c.name ?? ''));
-  const missingWithoutDefaults = missingSymbols
-    .filter((col) => !col.increment(compiler) && !col.default(compiler))
-    .map((c) => c.name ?? '');
-  if (isEmpty(missingWithoutDefaults)) return [];
+  const missingWithoutDefaultSymbols = missingSymbols
+    .filter((col) => !col.increment(compiler) && !col.default(compiler));
+  if (isEmpty(missingWithoutDefaultSymbols)) return [];
 
-  const constraintType = getConstraintType(missingWithoutDefaults.length);
-  const columnRef = formatFullColumnNames(schemaName, tableName, missingWithoutDefaults);
-  const message = `${constraintType}: Column ${columnRef} is missing from record and has no default value`;
-
-  return record.values.map(() => new CompileWarning(
-    CompileErrorCode.INVALID_RECORDS_FIELD,
-    message,
-    recordBlock,
-  ));
+  return record.values.map(() =>
+    recordsPkMissing(compiler, recordBlock, { table: tableSymbol, columns: missingWithoutDefaultSymbols }));
 }
 
 // Collect all PK constraints for a table.

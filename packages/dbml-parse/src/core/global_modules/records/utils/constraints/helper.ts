@@ -1,6 +1,5 @@
 import type Compiler from '@/compiler/index';
 import { DEFAULT_SCHEMA_NAME } from '@/constants';
-import { CompileErrorCode, CompileWarning } from '@/core/types/errors';
 import type { RecordValue } from '@/core/types/schemaJson';
 import type { TableRecord } from '@/core/types/schemaJson';
 import type { ColumnSymbol } from '@/core/types/symbol';
@@ -109,20 +108,13 @@ export function getDiagnosticAnchorValues (
   return present.length > 0 ? present : Object.values(row).filter(Boolean);
 }
 
-// Create a compile warning anchored to the AST node at a record value's position.
-export function createConstraintWarning (
+// Resolve the AST node for a record value's position.
+// Resolve the AST node for a record value's position.
+export function resolveRecordValueNode (
   compiler: Compiler,
   recordValue: RecordValue,
-  message: string,
-): CompileWarning {
-  const {
-    token,
-  } = recordValue;
-  const node = compiler.nodeAtPosition(token.filepath, token.start.offset)
+) {
+  const { token } = recordValue;
+  return compiler.nodeAtPosition(token.filepath, token.start.offset)
     ?? compiler.parse.ast(token.filepath);
-  return new CompileWarning(
-    CompileErrorCode.INVALID_RECORDS_FIELD,
-    message,
-    node,
-  );
 }

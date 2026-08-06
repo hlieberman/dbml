@@ -296,7 +296,7 @@ watch(() => filepath, () => {
   pendingRetrigger = false;
 });
 
-watch([() => parser.errors, () => parser.warnings], () => {
+watch([() => parser.errors, () => parser.warnings, () => parser.infos], () => {
   const _editor = editor.value;
   if (!_editor) return;
   const model = _editor.getModel();

@@ -31,10 +31,10 @@
               <span class="relative w-1.5 h-1.5 rounded-full bg-blue-500" />
             </span>
             <span
-              v-if="tab.id === OutputTabId.Diagnostics && (parser.errors.length + parser.warnings.length) > 0"
+              v-if="tab.id === OutputTabId.Diagnostics && (parser.errors.length + parser.warnings.length + parser.infos.length) > 0"
               class="absolute -top-1.5 -right-2 flex items-center justify-center min-w-[12px] h-[12px] rounded-full px-[3px] text-[8px] font-bold leading-none text-white"
-              :class="parser.errors.length > 0 ? 'bg-red-500' : 'bg-yellow-500'"
-            >{{ parser.errors.length + parser.warnings.length }}</span>
+              :class="parser.errors.length > 0 ? 'bg-red-500' : parser.warnings.length > 0 ? 'bg-yellow-500' : 'bg-blue-500'"
+            >{{ parser.errors.length + parser.warnings.length + parser.infos.length }}</span>
           </span>
           <span class="@[460px]/tabbar:inline hidden">{{ tab.label }}</span>
         </button>
@@ -79,6 +79,7 @@
         v-if="activeTab === OutputTabId.Diagnostics"
         :errors="parser.errors"
         :warnings="parser.warnings"
+        :infos="parser.infos"
         :current-file="project.currentFile"
         @position-click="onDiagnosticClick"
       />
@@ -98,6 +99,7 @@ import {
   PhCheckCircle,
   PhWarning,
   PhWarningCircle,
+  PhInfo,
 } from '@phosphor-icons/vue';
 import TokensTab from './tabs/TokensTab.vue';
 import AstTreeView from './ast/AstTreeView.vue';
@@ -137,12 +139,14 @@ interface Tab {
 const diagnosticsIcon = computed(() => {
   if (parser.errors.length > 0) return PhWarningCircle;
   if (parser.warnings.length > 0) return PhWarning;
+  if (parser.infos.length > 0) return PhInfo;
   return PhCheckCircle;
 });
 
 const diagnosticsColor = computed(() => {
   if (parser.errors.length > 0) return 'text-red-500';
   if (parser.warnings.length > 0) return 'text-yellow-500';
+  if (parser.infos.length > 0) return 'text-blue-500';
   return 'text-blue-400';
 });
 
@@ -275,7 +279,7 @@ function navigateTo (range: {
   }
 }
 
-// Reveal and highlight the syntax range a diagnostic points at. ParserError
+// Reveal and highlight the syntax range a diagnostic points at. ParserDiagnostic
 // carries start/end line+column - translate straight into an editor range.
 function onDiagnosticClick (diag: {
   location: {
