@@ -43,7 +43,6 @@ Dep: raw_orders.user_id -> stg_orders.user_id
   });
 });
 
-
 describe('[example] multifile interpreter - cross-file standalone Dep with bare-table endpoints', () => {
   // Bare-table endpoints (no .col). Verifies my 11.12 nodeRefereeOfDepEndpoint
   // and 11.18 extractTableFromDepEndpoint work across files.
@@ -81,7 +80,6 @@ Dep: raw_orders -> stg_orders
   });
 });
 
-
 describe('[example] multifile interpreter - <- reverse-direction Dep normalizes across files', () => {
   // Consumer writes `Dep: stg_orders <- raw_orders`. Interpreter should swap so
   // canonical shape is upstream=raw_orders, downstream=stg_orders.
@@ -115,7 +113,6 @@ Dep: stg_orders <- raw_orders
     expect(edge.downstream.tableName).toBe('stg_orders');
   });
 });
-
 
 describe('[example] multifile interpreter - inline dep on imported column carried to consumer', () => {
   // Inline `[dep: -> ...]` on a column of an imported table must survive in the
@@ -153,7 +150,6 @@ use { table users } from './source.dbml'
   });
 });
 
-
 describe('[example] multifile interpreter - inline dep on imported table header pulled to db.deps', () => {
   // Inline `[dep: <- source]` on a Table header creates a table-level Dep that
   // lands in db.deps[].
@@ -186,7 +182,6 @@ use { table fct_orders } from './source.dbml'
     expect(edge.downstream.tableName).toBe('fct_orders');
   });
 });
-
 
 describe('[example] multifile interpreter - standalone Dep between two imported tables auto-pulled', () => {
   // Source declares Dep; consumer imports both tables. Dep should auto-pull
@@ -223,7 +218,6 @@ use { table stg_orders } from './source.dbml'
   });
 });
 
-
 describe('[example] multifile interpreter - Dep NOT pulled when one endpoint missing', () => {
   // Only one table imported; the Dep should be filtered out.
   const { compiler } = setupCompiler({
@@ -248,7 +242,6 @@ use { table stg_orders } from './source.dbml'
     expect(db.deps).toHaveLength(0);
   });
 });
-
 
 describe('[example] multifile interpreter - Dep with custom + note auto-pulled across files', () => {
   // Custom attrs and note attached to a Dep block must survive auto-pull.
@@ -293,7 +286,6 @@ use { table fct_orders } from './source.dbml'
   });
 });
 
-
 describe('[example] multifile interpreter - aliased table referenced in cross-file Dep endpoints', () => {
   // Source declares Dep; consumer imports one table with alias.
   // The pulled Dep's endpoints must be rewritten to use the alias.
@@ -328,7 +320,6 @@ use { table stg_orders } from './source.dbml'
     expect(edge.downstream.tableName).toBe('stg_orders');
   });
 });
-
 
 describe('[example] multifile interpreter - Dep between tables from different imported files', () => {
   // file-a defines raw_orders; file-b defines stg_orders + Dep targeting raw_orders.

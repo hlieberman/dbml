@@ -19,7 +19,9 @@ import {
   SchemaSymbol,
   SymbolKind,
 } from '@/core/types/symbol';
-import { MetadataKind, PartialRefMetadata, RecordsMetadata, DepMetadata } from '@/core/types/symbol/metadata';
+import {
+  MetadataKind, PartialRefMetadata, RecordsMetadata, DepMetadata,
+} from '@/core/types/symbol/metadata';
 import { TableSymbol } from '@/core/types/symbol';
 import type { InternedNodeSymbol } from '@/core/types/symbol/symbols';
 import {
