@@ -1,3 +1,24 @@
+## v10.0.0 (2026-08-10)
+
+#### :bug: Bug Fix
+* `dbml-parse`
+  * [#952](https://github.com/holistics/dbml/pull/952) Fix many-to-many FK validation in records constraints ([@huydo862003](https://github.com/huydo862003))
+
+#### :rocket: New Feature
+* `dbml-cli`, `dbml-connector`, `dbml-core`, `dbml-parse`
+  * [#933](https://github.com/holistics/dbml/pull/933) Data dependency ([@NQPhuc](https://github.com/NQPhuc))
+
+#### :robot: Dependencies Update
+* [#931](https://github.com/holistics/dbml/pull/931) chore(deps): bump @babel/core from 7.24.5 to 7.29.7 in /dbml-homepage ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#944](https://github.com/holistics/dbml/pull/944) chore(deps): bump immutable from 4.3.8 to 4.3.9 in /dbml-homepage ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#943](https://github.com/holistics/dbml/pull/943) chore(deps): bump svgo from 3.2.0 to 3.3.4 in /dbml-homepage ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#945](https://github.com/holistics/dbml/pull/945) chore(deps): bump shell-quote from 1.8.4 to 1.10.0 in /dbml-homepage ([@dependabot[bot]](https://github.com/apps/dependabot))
+* [#926](https://github.com/holistics/dbml/pull/926) chore(deps): bump joi from 17.13.0 to 17.13.4 in /dbml-homepage ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 2
+- Huy Do Nguyen An ([@huydo862003](https://github.com/huydo862003))
+- NQPhuc ([@NQPhuc](https://github.com/NQPhuc))
+
 ## v9.1.1 (2026-07-31)
 
 #### :bug: Bug Fix
