@@ -96,7 +96,7 @@ describe('[example - record] composite unique constraints', () => {
     // One warning per UNIQUE column per duplicate row -> 2 rows × 2 columns = 4.
     expect(infos.length).toBe(4);
     for (const w of infos) {
-      expect(w.diagnostic).toBe('Duplicate Composite UNIQUE: (user_profiles.user_id, user_profiles.profile_type) = (1, "work")');
+      expect(w.diagnostic).toBe('Duplicate Composite UNIQUE: `(user_profiles.user_id, user_profiles.profile_type)` = `(1, "work")`');
     }
   });
 
@@ -472,6 +472,6 @@ describe('[example - record] simple unique constraints', () => {
     // code defaults to 0 for both rows, so both have UNIQUE code = 0 - duplicates
     expect(infos.length).toBeGreaterThanOrEqual(1);
     expect(infos[0].diagnostic).toContain('Duplicate UNIQUE');
-    expect(infos[0].diagnostic).toContain('= 0');
+    expect(infos[0].diagnostic).toContain('= `0`');
   });
 });

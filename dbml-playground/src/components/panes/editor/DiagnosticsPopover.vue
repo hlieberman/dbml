@@ -13,7 +13,7 @@
     >
       <!-- Trigger badge -->
       <button
-        class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm select-none cursor-pointer transition-colors"
+        class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium select-none cursor-pointer transition-colors"
         :class="badgeClass"
       >
         <PhProhibit
@@ -35,12 +35,13 @@
       <template #popper>
         <div
           class="w-[480px]"
-          style="height: 40vh;"
+          style="height: 60vh; min-height: 300px; max-height: 700px;"
         >
           <ProblemsPanel
             :errors="errors"
             :warnings="warnings"
             :infos="infos"
+            :source="source"
             @diagnostic-jump="emit('diagnostic-jump', $event)"
             @apply-fix="emit('apply-fix', $event)"
           />
@@ -60,6 +61,7 @@ const props = defineProps<{
   errors: readonly ParserDiagnostic[];
   warnings: readonly ParserDiagnostic[];
   infos: readonly ParserDiagnostic[];
+  source: string;
 }>();
 
 const emit = defineEmits<{

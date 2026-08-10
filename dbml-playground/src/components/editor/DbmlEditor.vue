@@ -4,7 +4,7 @@
       ref="editorContainer"
       class="flex-1 min-h-0"
     />
-    <div class="status-bar bg-gray-50 border-t border-gray-200 px-3 py-1 text-xs text-gray-600 flex justify-between items-center">
+    <div class="status-bar bg-white border-t border-gray-200 px-3 py-1 text-xs text-gray-600 flex justify-between items-center">
       <div class="flex items-center space-x-4">
         <span>DBML</span>
         <span v-if="!readOnly">UTF-8</span>

@@ -81,6 +81,7 @@ function toParserDiagnostic (diagnostic: Diagnostic): ParserDiagnostic {
       line: Number(diagnostic.endRow),
       column: Number(diagnostic.endColumn),
     },
+    ...(diagnostic.category ? { category: diagnostic.category } : {}),
     ...(diagnostic.explanation ? { explanation: diagnostic.explanation } : {}),
     ...(diagnostic.quickFixes?.length ? { quickFixes: diagnostic.quickFixes } : {}),
   };

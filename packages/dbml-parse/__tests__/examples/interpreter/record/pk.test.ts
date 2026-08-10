@@ -97,7 +97,7 @@ describe('[example - record] composite primary key constraints', () => {
     // each anchored on the offending row's column cell.
     expect(infos.length).toBe(4);
     for (const w of infos) {
-      expect(w.diagnostic).toBe('Duplicate Composite PK: (order_items.order_id, order_items.product_id) = (1, 100)');
+      expect(w.diagnostic).toBe('Duplicate Composite PK: `(order_items.order_id, order_items.product_id)` = `(1, 100)`');
     }
   });
 
@@ -122,10 +122,10 @@ describe('[example - record] composite primary key constraints', () => {
     const infos = result.getInfos();
 
     expect(infos.length).toBe(4);
-    expect(infos[0].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
-    expect(infos[1].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
-    expect(infos[2].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
-    expect(infos[3].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
+    expect(infos[0].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
+    expect(infos[1].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
+    expect(infos[2].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
+    expect(infos[3].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
   });
 });
 
@@ -275,7 +275,7 @@ describe('[example - record] simple primary key constraints', () => {
     const infos = result.getInfos();
 
     expect(infos.length).toBe(1);
-    expect(infos[0].diagnostic).toBe('NULL in PK: users.id cannot be NULL');
+    expect(infos[0].diagnostic).toBe('NULL in PK: `users.id` cannot be NULL');
   });
 
   test('should not crash when simple PK with default is unspecified and records have duplicates', () => {
@@ -295,7 +295,7 @@ describe('[example - record] simple primary key constraints', () => {
     // id defaults to 0 for both rows, so both have PK = 0 - duplicates
     expect(infos.length).toBeGreaterThanOrEqual(1);
     expect(infos[0].diagnostic).toContain('Duplicate PK');
-    expect(infos[0].diagnostic).toContain('= 0');
+    expect(infos[0].diagnostic).toContain('= `0`');
   });
 
   test('should not crash when simple PK with increment is unspecified', () => {

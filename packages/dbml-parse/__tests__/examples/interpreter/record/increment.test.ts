@@ -201,7 +201,7 @@ describe('[example - record] auto-increment and serial type constraints', () => 
 
     // Both NULLs resolve to default value 1, which is a duplicate
     expect(infos.length).toBe(2);
-    expect(infos[0].diagnostic).toBe('Duplicate PK: users.id = null');
-    expect(infos[1].diagnostic).toBe('Duplicate PK: users.id = null');
+    expect(infos[0].diagnostic).toBe('Duplicate PK: `users.id` = `null`');
+    expect(infos[1].diagnostic).toBe('Duplicate PK: `users.id` = `null`');
   });
 });

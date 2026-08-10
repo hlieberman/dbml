@@ -15,7 +15,9 @@ export interface QuickFixEdit {
 
 export interface QuickFixAction {
   readonly title: string;
+  readonly shortTitle?: string;
   readonly edits: readonly QuickFixEdit[];
+  readonly isPreferred?: boolean;
 }
 
 export interface ParserDiagnostic {
@@ -29,6 +31,7 @@ export interface ParserDiagnostic {
     readonly line: number;
     readonly column: number;
   };
+  readonly category?: string;
   readonly explanation?: string;
   readonly quickFixes?: readonly QuickFixAction[];
 }

@@ -109,7 +109,6 @@ export function getDiagnosticAnchorValues (
 }
 
 // Resolve the AST node for a record value's position.
-// Resolve the AST node for a record value's position.
 export function resolveRecordValueNode (
   compiler: Compiler,
   recordValue: RecordValue,

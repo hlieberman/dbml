@@ -8,6 +8,7 @@ import type Compiler from '@/compiler';
 import {
   CompileErrorCode,
   CompileInfo,
+  DiagnosticCategory,
   type QuickFix,
 } from '@/core/types/errors';
 import type { SyntaxNode } from '@/core/types/nodes';
@@ -37,16 +38,16 @@ export function refNullableMismatch (
   const isComposite = columns.length > 1;
 
   const message = isComposite
-    ? `Columns (${names}) are all nullable but operator '${relOp}' requires at least one to be NOT NULL`
-    : `Column '${names}' is nullable but operator '${relOp}' requires it to be NOT NULL`;
+    ? `Columns (\`${names}\`) are all nullable but operator \`${relOp}\` requires at least one to be NOT NULL`
+    : `Column \`${names}\` is nullable but operator \`${relOp}\` requires it to be NOT NULL`;
 
   const refSnippet = getSourceSnippet(compiler, refNode);
   const colDecl = columns[0]?.declaration;
   const colSnippet = colDecl && getSourceSnippet(compiler, colDecl);
   const explanation = [
-    `- In \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` requires \`${names}\` to reference an existing row.`,
+    `- In ref definition \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` requires \`${names}\` to reference an existing row.`,
     colSnippet
-      ? `- In \`${colSnippet}\`, the column is nullable, which allows rows with no parent.`
+      ? `- In column definition \`${colSnippet}\`, the column is nullable, which allows rows with no parent.`
       : '- A nullable column allows rows with no parent.',
   ].join('\n');
 
@@ -54,7 +55,7 @@ export function refNullableMismatch (
     CompileErrorCode.INVALID_REF_RELATIONSHIP,
     message,
     node,
-    { explanation, quickFixes },
+    { category: DiagnosticCategory.RefColumnMismatch, explanation, quickFixes },
   );
 }
 
@@ -75,17 +76,17 @@ export function refNotNullMismatch (
   const isComposite = columns.length > 1;
 
   const message = isComposite
-    ? `Columns (${names}) are NOT NULL but operator '${relOp}' allows them to be optional`
-    : `Column '${names}' is NOT NULL but operator '${relOp}' allows it to be optional`;
+    ? `Columns (\`${names}\`) are NOT NULL but operator \`${relOp}\` allows them to be optional`
+    : `Column \`${names}\` is NOT NULL but operator \`${relOp}\` allows it to be optional`;
 
   const refSnippet = getSourceSnippet(compiler, refNode);
   const colDecl = columns[0]?.declaration;
   const colSnippet = colDecl && getSourceSnippet(compiler, colDecl);
 
   const explanation = [
-    `- In \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` marks \`${names}\` as optional.`,
+    `- In ref definition \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` marks \`${names}\` as optional.`,
     colSnippet
-      ? `- In \`${colSnippet}\`, the column is NOT NULL.`
+      ? `- In column definition \`${colSnippet}\`, the column is NOT NULL.`
       : '- The column is NOT NULL.',
   ].join('\n');
 
@@ -93,7 +94,7 @@ export function refNotNullMismatch (
     CompileErrorCode.INVALID_REF_RELATIONSHIP,
     message,
     node,
-    { explanation, quickFixes },
+    { category: DiagnosticCategory.RefColumnMismatch, explanation, quickFixes },
   );
 }
 
@@ -114,12 +115,12 @@ export function refUniqueMismatch (
   const isComposite = columns.length > 1;
 
   const message = isComposite
-    ? `Columns (${names}) have a unique index but operator '${relOp}' allows many`
-    : `Column '${names}' is unique but operator '${relOp}' allows many`;
+    ? `Columns (\`${names}\`) have a unique index but operator \`${relOp}\` allows many`
+    : `Column \`${names}\` is unique but operator \`${relOp}\` allows many`;
 
   const refSnippet = getSourceSnippet(compiler, refNode);
   const explanation = [
-    `- In \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` allows many.`,
+    `- In ref definition \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` allows many.`,
     `- \`${names}\` has a unique constraint, so each value can appear at most once.`,
   ].join('\n');
 
@@ -127,7 +128,7 @@ export function refUniqueMismatch (
     CompileErrorCode.INVALID_REF_RELATIONSHIP,
     message,
     node,
-    { explanation, quickFixes },
+    { category: DiagnosticCategory.RefColumnMismatch, explanation, quickFixes },
   );
 }
 
@@ -148,12 +149,12 @@ export function refNonUniqueMismatch (
   const isComposite = columns.length > 1;
 
   const message = isComposite
-    ? `Columns (${names}) should have a composite unique index for operator '${relOp}'`
-    : `Column '${names}' should be unique or primary key for operator '${relOp}'`;
+    ? `Columns (\`${names}\`) should have a composite unique index for operator \`${relOp}\``
+    : `Column \`${names}\` should be unique or primary key for operator \`${relOp}\``;
 
   const refSnippet = getSourceSnippet(compiler, refNode);
   const explanation = [
-    `- In \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` implies \`${names}\` has at most one row.`,
+    `- In ref definition \`${refSnippet ?? relOp}\`, the operator \`${relOp}\` implies \`${names}\` has at most one row.`,
     `- \`${names}\` has no unique or primary key constraint.`,
   ].join('\n');
 
@@ -161,6 +162,6 @@ export function refNonUniqueMismatch (
     CompileErrorCode.INVALID_REF_RELATIONSHIP,
     message,
     node,
-    { explanation, quickFixes },
+    { category: DiagnosticCategory.RefColumnMismatch, explanation, quickFixes },
   );
 }

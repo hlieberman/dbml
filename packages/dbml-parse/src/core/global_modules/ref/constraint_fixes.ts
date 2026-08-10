@@ -187,10 +187,12 @@ function suggestChangeOp (
 
   return {
     title: `${description} (change operator to '${newOp}')`,
+    shortTitle: `Change to ${newOp}`,
     filepath: opToken.filepath,
     edits: [
       { start: opToken.start, end: opToken.end, newText: newOp },
     ],
+    isPreferred: true,
   };
 }
 
@@ -205,6 +207,7 @@ function suggestMakeNotNull (col: ColumnSymbol, compiler: Compiler): QuickFix | 
   const removeNull = removeSettingEdit(col.declaration, 'null', source);
   if (removeNull) {
     return { title: `Mark '${qname}' as NOT NULL`,
+      shortTitle: 'Add not null',
       filepath: col.declaration.filepath,
       edits: [
         removeNull,
@@ -214,6 +217,7 @@ function suggestMakeNotNull (col: ColumnSymbol, compiler: Compiler): QuickFix | 
   const edit = addSettingEdit(col.declaration, 'not null');
   if (!edit) return undefined;
   return { title: `Mark '${qname}' as NOT NULL`,
+    shortTitle: 'Add not null',
     filepath: col.declaration.filepath,
     edits: [
       edit,
@@ -229,6 +233,7 @@ function suggestMakeNullable (col: ColumnSymbol, compiler: Compiler): QuickFix |
   const edit = removeSettingEdit(col.declaration, 'not null', source);
   if (!edit) return undefined;
   return { title: `Mark '${col.qualifiedName(compiler).join('.')}' as NULL`,
+    shortTitle: 'Make nullable',
     filepath: col.declaration.filepath,
     edits: [
       edit,
@@ -279,6 +284,7 @@ function suggestMakeUnique (col: ColumnSymbol, compiler: Compiler): QuickFix | u
   const edit = addSettingEdit(col.declaration, 'unique');
   if (!edit) return undefined;
   return { title: `Mark '${col.qualifiedName(compiler).join('.')}' as UNIQUE`,
+    shortTitle: 'Add unique',
     filepath: col.declaration.filepath,
     edits: [
       edit,

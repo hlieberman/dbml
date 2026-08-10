@@ -151,11 +151,28 @@ export interface RelatedLocation {
 
 export interface QuickFix {
   title: string;
+  shortTitle?: string; // compact label for select boxes (e.g. "Add not null")
   filepath: Filepath;
   edits: TextEdit[];
+  isPreferred?: boolean; // used by "Fix all" to pick the default fix
+}
+
+export enum DiagnosticCategory {
+  // Column nullability or uniqueness doesn't match the ref operator (>, <, -, <>)
+  RefColumnMismatch = 'Mismatched optional ref constraints',
+
+  // Record value has wrong type for its column (e.g. string in integer column, invalid enum value)
+  RecordValueTypeMismatch = 'Record type errors',
+
+  // Record data violates a table constraint (PK null/duplicate, FK not found, unique duplicate)
+  RecordConstraintViolation = 'Record constraint violations',
+
+  // Diagnostics that don't fit a specific category
+  Other = 'Other',
 }
 
 export interface CompileDetails {
+  category?: DiagnosticCategory;
   explanation?: string;
   quickFixes?: QuickFix[];
 }

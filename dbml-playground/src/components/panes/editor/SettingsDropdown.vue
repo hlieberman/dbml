@@ -32,14 +32,6 @@
           >
           <span>Vim Mode</span>
         </label>
-        <label class="flex items-center space-x-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer">
-          <input
-            type="checkbox"
-            v-model="showDiagnosticsPopover"
-            class="rounded border-gray-300 text-blue-600"
-          >
-          <span>Diagnostics Popover</span>
-        </label>
 
         <!-- Rename Table nested dropdown -->
         <VDropdown
@@ -110,13 +102,11 @@ const emit = defineEmits<{
 const user = useUserStore();
 
 const vimMode = ref(user.prefs.isVim);
-const showDiagnosticsPopover = ref(user.prefs.showDiagnosticsPopover ?? true);
 const isOpen = ref(false);
 
 watch(vimMode, (val) => user.set('isVim', val));
-watch(showDiagnosticsPopover, (val) => user.set('showDiagnosticsPopover', val));
 
-defineExpose({ vimMode, showDiagnosticsPopover });
+defineExpose({ vimMode });
 
 // Rename Table
 const renameOldName = ref('');

@@ -16,10 +16,10 @@
         @cursor-move="emit('cursor-move', $event)"
       />
       <DiagnosticsPopover
-        v-if="settingsRef?.showDiagnosticsPopover ?? user.prefs.showDiagnosticsPopover"
         :errors="parser.errors"
         :warnings="parser.warnings"
         :infos="parser.infos"
+        :source="content"
         @diagnostic-jump="onDiagnosticJump"
         @apply-fix="onApplyFix"
       />
@@ -88,6 +88,8 @@ function onApplyFix ({ fix }: { diagnostic: ParserDiagnostic; fix: QuickFixActio
 
   model.pushEditOperations([], edits, () => null);
 }
+
+
 
 function onRenameTable ({ oldName, newName }: { oldName: string; newName: string }) {
   const filepath = Filepath.fromUri(monaco.Uri.file(project.currentFile).toString());

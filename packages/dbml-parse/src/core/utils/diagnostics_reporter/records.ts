@@ -8,7 +8,7 @@
  */
 
 import type Compiler from '@/compiler';
-import { CompileErrorCode, CompileInfo } from '@/core/types/errors';
+import { CompileErrorCode, CompileInfo, DiagnosticCategory } from '@/core/types/errors';
 import type { SyntaxNode } from '@/core/types/nodes';
 import type { SyntaxToken } from '@/core/types/tokens';
 import type { ColumnSymbol } from '@/core/types/symbol';
@@ -35,7 +35,7 @@ function constraintLabel (columns: ColumnSymbol[], kind: string): string {
   return columns.length > 1 ? `Composite ${kind}` : kind;
 }
 
-/* ---- Type validation ---- */
+/* Type validation */
 
 // NULL value in a NOT NULL column with no default or auto-increment.
 export function recordsNullNotAllowed (
@@ -47,9 +47,9 @@ export function recordsNullNotAllowed (
   const { colName } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `NULL not allowed for NOT NULL column '${colName}' without a default value or auto-increment`,
+    `NULL not allowed for NOT NULL column \`${colName}\` without a default value or auto-increment`,
     node,
-    { explanation: `\`${colName}\` is marked NOT NULL and has no default value or auto-increment.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` is marked NOT NULL and has no default value or auto-increment.` },
   );
 }
 
@@ -63,9 +63,9 @@ export function recordsInvalidEnum (
   const { colName } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Invalid enum value for column '${colName}'`,
+    `Invalid enum value for column \`${colName}\``,
     node,
-    { explanation: `\`${colName}\` uses an enum type. The value must match one of the defined enum members.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` uses an enum type. The value must match one of the defined enum members.` },
   );
 }
 
@@ -80,9 +80,9 @@ export function recordsInvalidNumeric (
   const { colName, typeName } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Invalid numeric value for column '${colName}'`,
+    `Invalid numeric value for column \`${colName}\``,
     node,
-    { explanation: `\`${colName}\` has type \`${typeName}\` which expects a numeric value. Provide a valid integer or decimal.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` has type \`${typeName}\` which expects a numeric value. Provide a valid integer or decimal.` },
   );
 }
 
@@ -97,9 +97,9 @@ export function recordsInvalidInteger (
   const { colName, value } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Invalid integer value ${value} for column '${colName}': expected integer, got decimal`,
+    `Invalid integer value \`${value}\` for column \`${colName}\`: expected integer, got decimal`,
     node,
-    { explanation: `\`${colName}\` is an integer column and cannot store decimal values.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` is an integer column and cannot store decimal values.` },
   );
 }
 
@@ -118,9 +118,9 @@ export function recordsExceedsPrecision (
   const { colName, typeName, value, precision, scale, totalDigits } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Numeric value ${value} for column '${colName}' exceeds precision: expected at most ${precision} total digits, got ${totalDigits}`,
+    `Numeric value \`${value}\` for column \`${colName}\` exceeds precision: expected at most ${precision} total digits, got ${totalDigits}`,
     node,
-    { explanation: `\`${colName}\` is defined as \`${typeName}(${precision},${scale})\`, allowing at most ${precision} total digits. The value \`${value}\` has ${totalDigits}.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` is defined as \`${typeName}(${precision},${scale})\`, allowing at most ${precision} total digits. The value \`${value}\` has ${totalDigits}.` },
   );
 }
 
@@ -139,9 +139,9 @@ export function recordsExceedsScale (
   const { colName, typeName, value, precision, scale, decimalDigits } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Numeric value ${value} for column '${colName}' exceeds scale: expected at most ${scale} decimal digits, got ${decimalDigits}`,
+    `Numeric value \`${value}\` for column \`${colName}\` exceeds scale: expected at most ${scale} decimal digits, got ${decimalDigits}`,
     node,
-    { explanation: `\`${colName}\` is defined as \`${typeName}(${precision},${scale})\`, allowing at most ${scale} decimal places. The value \`${value}\` has ${decimalDigits}.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` is defined as \`${typeName}(${precision},${scale})\`, allowing at most ${scale} decimal places. The value \`${value}\` has ${decimalDigits}.` },
   );
 }
 
@@ -155,9 +155,9 @@ export function recordsInvalidBoolean (
   const { colName } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Invalid boolean value for column '${colName}'`,
+    `Invalid boolean value for column \`${colName}\``,
     node,
-    { explanation: `\`${colName}\` is a boolean column. Use \`true\`/\`false\`, \`1\`/\`0\`, or \`'yes'\`/\`'no'\`.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` is a boolean column. Use \`true\`/\`false\`, \`1\`/\`0\`, or \`'yes'\`/\`'no'\`.` },
   );
 }
 
@@ -171,9 +171,9 @@ export function recordsInvalidDatetime (
   const { colName } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Invalid datetime value for column '${colName}'`,
+    `Invalid datetime value for column \`${colName}\``,
     node,
-    { explanation: `\`${colName}\` expects a date or time value. Supported formats include \`'YYYY-MM-DD'\`, \`'HH:MM:SS'\`, \`'YYYY-MM-DD HH:MM:SS'\`, \`'MM/DD/YYYY'\`, \`'D MMM YYYY'\`, or \`'MMM D, YYYY'\`.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` expects a date or time value. Supported formats include \`'YYYY-MM-DD'\`, \`'HH:MM:SS'\`, \`'YYYY-MM-DD HH:MM:SS'\`, \`'MM/DD/YYYY'\`, \`'D MMM YYYY'\`, or \`'MMM D, YYYY'\`.` },
   );
 }
 
@@ -187,9 +187,9 @@ export function recordsInvalidString (
   const { colName } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Invalid string value for column '${colName}'`,
+    `Invalid string value for column \`${colName}\``,
     node,
-    { explanation: `\`${colName}\` is a string column. Values must be wrapped in quotes.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` is a string column. Values must be wrapped in quotes.` },
   );
 }
 
@@ -207,13 +207,13 @@ export function recordsStringTooLong (
   const { colName, typeName, typeArg, maxLength, actualLength } = options;
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `String value for column '${colName}' exceeds maximum length: expected at most ${maxLength} bytes (UTF-8), got ${actualLength} bytes`,
+    `String value for column \`${colName}\` exceeds maximum length: expected at most ${maxLength} bytes (UTF-8), got ${actualLength} bytes`,
     node,
-    { explanation: `\`${colName}\` is defined as \`${typeName}(${typeArg})\`, limiting values to ${maxLength} bytes in UTF-8 encoding. The provided value uses ${actualLength} bytes.` },
+    { category: DiagnosticCategory.RecordValueTypeMismatch, explanation: `\`${colName}\` is defined as \`${typeName}(${typeArg})\`, limiting values to ${maxLength} bytes in UTF-8 encoding. The provided value uses ${actualLength} bytes.` },
   );
 }
 
-/* ---- Constraint validation ---- */
+/* Constraint validation */
 
 // NULL value in a primary key column.
 export function recordsPkNull (
@@ -229,9 +229,9 @@ export function recordsPkNull (
   const label = constraintLabel(columns, 'PK');
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `NULL in ${label}: ${columnRef} cannot be NULL`,
+    `NULL in ${label}: \`${columnRef}\` cannot be NULL`,
     node,
-    { explanation: `\`${columnRef}\` is a primary key and cannot be NULL.` },
+    { category: DiagnosticCategory.RecordConstraintViolation, explanation: `\`${columnRef}\` is a primary key and cannot be NULL.` },
   );
 }
 
@@ -250,9 +250,9 @@ export function recordsPkDuplicate (
   const label = constraintLabel(columns, 'PK');
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Duplicate ${label}: ${columnRef} = ${valueStr}`,
+    `Duplicate ${label}: \`${columnRef}\` = \`${valueStr}\``,
     node,
-    { explanation: `\`${columnRef}\` is a primary key and must be unique across all rows.` },
+    { category: DiagnosticCategory.RecordConstraintViolation, explanation: `\`${columnRef}\` is a primary key and must be unique across all rows.` },
   );
 }
 
@@ -270,9 +270,9 @@ export function recordsPkMissing (
   const label = constraintLabel(columns, 'PK');
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `${label}: Column ${columnRef} is missing from record and has no default value`,
+    `${label}: Column \`${columnRef}\` is missing from record and has no default value`,
     node,
-    { explanation: `\`${columnRef}\` is a primary key with no default or auto-increment, so it must be specified in the records block.` },
+    { category: DiagnosticCategory.RecordConstraintViolation, explanation: `\`${columnRef}\` is a primary key with no default or auto-increment, so it must be specified in the records block.` },
   );
 }
 
@@ -294,9 +294,9 @@ export function recordsFkNull (
   const rightRef = formatColumnRef(compiler, rightTable, rightColumns, filepath);
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `FK violation: ${leftRef} = ${valueStr} must not be NULL`,
+    `FK violation: \`${leftRef}\` = \`${valueStr}\` must not be NULL`,
     node,
-    { explanation: `\`${leftRef}\` references \`${rightRef}\`, so every row must have a non-null value.` },
+    { category: DiagnosticCategory.RecordConstraintViolation, explanation: `\`${leftRef}\` references \`${rightRef}\`, so every row must have a non-null value.` },
   );
 }
 
@@ -318,9 +318,9 @@ export function recordsFkNotFound (
   const rightRef = formatColumnRef(compiler, rightTable, rightColumns, filepath);
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `FK violation: ${leftRef} = ${valueStr} does not exist in ${rightRef}`,
+    `FK violation: \`${leftRef}\` = \`${valueStr}\` does not exist in \`${rightRef}\``,
     node,
-    { explanation: `\`${leftRef}\` is a foreign key referencing \`${rightRef}\`. Every value must match an existing row.` },
+    { category: DiagnosticCategory.RecordConstraintViolation, explanation: `\`${leftRef}\` is a foreign key referencing \`${rightRef}\`. Every non-null value in an FK must match an existing row in the referenced column.` },
   );
 }
 
@@ -339,8 +339,8 @@ export function recordsUniqueDuplicate (
   const label = constraintLabel(columns, 'UNIQUE');
   return new CompileInfo(
     CompileErrorCode.INVALID_RECORDS_FIELD,
-    `Duplicate ${label}: ${columnRef} = ${valueStr}`,
+    `Duplicate ${label}: \`${columnRef}\` = \`${valueStr}\``,
     node,
-    { explanation: `\`${columnRef}\` has a unique constraint, so no two rows can have the same value.` },
+    { category: DiagnosticCategory.RecordConstraintViolation, explanation: `\`${columnRef}\` has a unique constraint, so no two rows can have the same value.` },
   );
 }

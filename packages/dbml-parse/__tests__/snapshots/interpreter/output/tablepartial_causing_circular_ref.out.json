@@ -260,7 +260,7 @@
   "infos": [
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col1' is nullable but operator '>' requires it to be NOT NULL",
+      "diagnostic": "Column `T.col1` is nullable but operator `>` requires it to be NOT NULL",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -272,7 +272,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col1' should be unique or primary key for operator '>'",
+      "diagnostic": "Column `T.col1` should be unique or primary key for operator `>`",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -284,7 +284,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col1' should be unique or primary key for operator '>'",
+      "diagnostic": "Column `T.col1` should be unique or primary key for operator `>`",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -296,7 +296,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col3' is nullable but operator '>' requires it to be NOT NULL",
+      "diagnostic": "Column `T.col3` is nullable but operator `>` requires it to be NOT NULL",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -308,7 +308,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col3' should be unique or primary key for operator '>'",
+      "diagnostic": "Column `T.col3` should be unique or primary key for operator `>`",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -320,7 +320,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col2' should be unique or primary key for operator '>'",
+      "diagnostic": "Column `T.col2` should be unique or primary key for operator `>`",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -332,7 +332,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col2' is nullable but operator '>' requires it to be NOT NULL",
+      "diagnostic": "Column `T.col2` is nullable but operator `>` requires it to be NOT NULL",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -344,7 +344,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col2' should be unique or primary key for operator '>'",
+      "diagnostic": "Column `T.col2` should be unique or primary key for operator `>`",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
@@ -356,7 +356,7 @@
     },
     {
       "code": "INVALID_REF_RELATIONSHIP",
-      "diagnostic": "Column 'T.col3' should be unique or primary key for operator '>'",
+      "diagnostic": "Column `T.col3` should be unique or primary key for operator `>`",
       "filepath": "/main.dbml",
       "level": "info",
       "node": {
