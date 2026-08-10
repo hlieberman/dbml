@@ -2,6 +2,7 @@ import { get } from 'lodash-es';
 import Check from './check';
 import { DEFAULT_SCHEMA_NAME } from './config';
 import Element from './element';
+import type DepEdge from './depEdge';
 import type { Token } from '../../types/model_structure/element';
 import type { NormalizedModel } from '../../types/model_structure/database';
 import type TableType from '../../types/model_structure/table';
@@ -43,6 +44,7 @@ class Field extends Element {
   increment: boolean;
   checks: Check[];
   endpoints: EndpointType[];
+  depEdges: DepEdge[];
   table: TableType;
   injectedPartial: TablePartialType | null;
   injectedToken: Token | null;
@@ -73,6 +75,7 @@ class Field extends Element {
     this.increment = increment;
     this.checks = [];
     this.endpoints = [];
+    this.depEdges = [];
     this.table = table;
     this.injectedPartial = injectedPartial;
     this.injectedToken = injectedToken;
@@ -113,6 +116,10 @@ class Field extends Element {
     this.endpoints.push(endpoint);
   }
 
+  pushDepEdge (depEdge: DepEdge) {
+    this.depEdges.push(depEdge);
+  }
+
   export () {
     return {
       ...this.shallowExport(),
@@ -129,6 +136,7 @@ class Field extends Element {
   exportChildIds () {
     return {
       endpointIds: this.endpoints.map((e) => e.id),
+      depEdgeIds: this.depEdges.map((e) => e.id),
     };
   }
 

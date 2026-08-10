@@ -2,13 +2,13 @@ import { describe, expect, test } from 'vitest';
 import { DEFAULT_ENTRY } from '@/constants';
 import Compiler from '@/compiler/index';
 import { MemoryProjectLayout } from '@/compiler/projectLayout/layout';
-import { TableNameInput } from '@/compiler/queries/transform';
+import type { TableIdentifier } from '@/compiler/queries/transform/types';
 import { Filepath } from '@/core/types/filepath';
 import { setupCompiler, fp } from '../interpreter/multifile/utils';
 
 function renameTable (
-  oldName: TableNameInput,
-  newName: TableNameInput,
+  oldName: string | TableIdentifier,
+  newName: string | TableIdentifier,
   input: string,
 ): string {
   const layout = new MemoryProjectLayout();

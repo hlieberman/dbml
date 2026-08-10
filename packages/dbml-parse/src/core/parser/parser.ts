@@ -1565,6 +1565,9 @@ const infixBpMap: Record<string, { left: number; right: number }> = {
       '?<>',
       '<>?',
       '?<>?',
+      // dep operators bind like the relationship ops
+      '->',
+      '<-',
     ]
       .map((op) => [
         op,
@@ -1596,6 +1599,8 @@ const prefixBpMap: Record<string, { left: null; right: number }> = Object.fromEn
     '?<>',
     '<>?',
     '?<>?',
+    '->',
+    '<-',
     '!',
     '~',
   ]

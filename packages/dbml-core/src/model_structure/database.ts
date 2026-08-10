@@ -1,9 +1,10 @@
 import { capitalize, get } from 'lodash-es';
 import { parseCardinality, makeCardinalityRequired } from '@dbml/parse';
 import {
-  DEFAULT_SCHEMA_NAME, ENUM, NOTE, REF, TABLE, TABLE_GROUP,
+  DEFAULT_SCHEMA_NAME, DEP, ENUM, NOTE, REF, TABLE, TABLE_GROUP,
 } from './config';
 import DbState from './dbState';
+import Dep from './dep';
 import Element from './element';
 import Enum from './enum';
 import Ref from './ref';
@@ -40,6 +41,7 @@ class Database extends Element {
     notes = [],
     enums = [],
     refs = [],
+    deps = [],
     tableGroups = [],
     project = {} as any,
     aliases = [],
@@ -77,6 +79,7 @@ class Database extends Element {
     this.linkRecordsToTables();
     this.processSchemaElements(notes, NOTE);
     this.processSchemaElements(refs, REF);
+    this.processSchemaElements(deps, DEP);
     this.processSchemaElements(tableGroups, TABLE_GROUP);
 
     this.injectedRawRefs.forEach((rawRef) => {
@@ -174,6 +177,10 @@ class Database extends Element {
 
         case REF:
           schema.pushRef(new Ref({ ...element, schema }));
+          break;
+
+        case DEP:
+          schema.pushDep(new Dep({ ...element, schema }));
           break;
 
         default:
@@ -339,6 +346,8 @@ class Database extends Element {
       schemas: {},
       notes: {},
       refs: {},
+      deps: {},
+      depEdges: {},
       enums: {},
       tableGroups: {},
       tables: {},

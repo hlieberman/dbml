@@ -393,6 +393,8 @@ export default class Lexer {
           if (this.peek() === '?') this.advance(); // <>?
         } else if (this.peek() === '?') {
           this.advance(); // <?
+        } else if (this.peek() === '-') {
+          this.advance(); // <- (dep upstream)
         }
         break;
       case '>':
@@ -400,7 +402,8 @@ export default class Lexer {
         else if (this.peek() === '?') this.advance(); // >?
         break;
       case '-':
-        if (this.peek() === '?') this.advance(); // -?
+        if (this.peek() === '>') this.advance(); // -> (dep downstream)
+        else if (this.peek() === '?') this.advance(); // -?
         break;
       case '?':
         if (this.peek() === '-') {

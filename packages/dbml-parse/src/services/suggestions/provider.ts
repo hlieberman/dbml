@@ -3,6 +3,7 @@ import { DEFAULT_SCHEMA_NAME, NONE_COLOR } from '@/constants';
 import { isComment } from '@/core/lexer/utils';
 import { Filepath } from '@/core/types/filepath';
 import { ElementKind, SettingName } from '@/core/types/keywords';
+import { DEP_DOWNSTREAM, DEP_UPSTREAM } from '@/core/types/schemaJson';
 import { UNHANDLED } from '@/core/types/module';
 import {
   AttributeNode,
@@ -63,6 +64,7 @@ const SUGGESTION_LABEL = {
   Enum: 'Enum',
   Project: 'Project',
   Ref: 'Ref',
+  Dep: 'Dep',
   TablePartial: 'TablePartial',
   Records: 'Records',
   DiagramView: 'DiagramView',
@@ -158,6 +160,7 @@ const COLUMN_BARE_SETTINGS = [
 ] as const;
 const COLUMN_COLON_SETTINGS = [
   SettingName.Ref,
+  SettingName.Dep,
   SettingName.Default,
   SettingName.Note,
   SettingName.Check,
@@ -251,6 +254,7 @@ export const PROJECT_FIELD_SUGGESTION_LABELS = [
   SUGGESTION_LABEL.Enum,
   SUGGESTION_LABEL.Note,
   SUGGESTION_LABEL.Ref,
+  SUGGESTION_LABEL.Dep,
   SUGGESTION_LABEL.TablePartial,
 ];
 
@@ -336,6 +340,8 @@ export default class DBMLCompletionItemProvider implements CompletionItemProvide
           case '<':
           case '<>':
           case '-':
+          case DEP_DOWNSTREAM:
+          case DEP_UPSTREAM:
             return suggestOnRelOp(
               this.compiler,
               filepath,
@@ -356,6 +362,8 @@ export default class DBMLCompletionItemProvider implements CompletionItemProvide
           case '<':
           case '<>':
           case '-':
+          case DEP_DOWNSTREAM:
+          case DEP_UPSTREAM:
             return suggestOnRelOp(
               this.compiler,
               filepath,
@@ -422,6 +430,7 @@ function suggestOnRelOp (
 
   if ([
     ScopeKind.REF,
+    ScopeKind.DEP,
     ScopeKind.TABLE,
     ScopeKind.TABLEPARTIAL,
   ].includes(scopeKind)) {
@@ -570,6 +579,7 @@ function suggestInTuple (compiler: Compiler, filepath: Filepath, offset: number,
     case ScopeKind.INDEXES:
       return suggestColumnNameInIndexes(compiler, filepath, offset);
     case ScopeKind.REF:
+    case ScopeKind.DEP:
       {
         while (containers.length > 0) {
           const container = containers.pop()!;
@@ -719,6 +729,19 @@ function suggestAttributeName (compiler: Compiler, filepath: Filepath, offset: n
           REF_SETTING_SUGGESTION_LABELS,
           REF_SETTING_SUGGESTION_TEXT_INSERTS,
         ),
+      };
+    case ScopeKind.DEP:
+      return {
+        suggestions: [
+          SettingName.Note,
+          SettingName.Color,
+        ].map((name) => ({
+          label: name,
+          insertText: `${name}: `,
+          kind: CompletionItemKind.Property,
+          insertTextRules: CompletionItemInsertTextRule.KeepWhitespace,
+          range: undefined as any,
+        })),
       };
     case ScopeKind.CHECKS:
       return {
@@ -890,7 +913,8 @@ function suggestInSubField (
       return suggestInIndex(compiler, filepath, offset);
     case ScopeKind.ENUM:
       return suggestInEnumField(compiler, filepath, offset, container);
-    case ScopeKind.REF: {
+    case ScopeKind.REF:
+    case ScopeKind.DEP: {
       const suggestions = suggestInRefField(compiler, filepath, offset);
 
       return (
@@ -926,6 +950,7 @@ export const TOP_LEVEL_SUGGESTION_LABELS = [
   SUGGESTION_LABEL.Enum,
   SUGGESTION_LABEL.Project,
   SUGGESTION_LABEL.Ref,
+  SUGGESTION_LABEL.Dep,
   SUGGESTION_LABEL.TablePartial,
   SUGGESTION_LABEL.Records,
   SUGGESTION_LABEL.DiagramView,

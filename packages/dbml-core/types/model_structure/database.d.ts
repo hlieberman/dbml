@@ -1,5 +1,7 @@
 import Schema, { NormalizedSchemaIdMap, RawSchema } from './schema';
 import Ref, { NormalizedRefIdMap } from './ref';
+import Dep, { NormalizedDepIdMap } from './dep';
+import { NormalizedDepEdgeIdMap } from './dep_edge';
 import Enum, { NormalizedEnumIdMap } from './enum';
 import TableGroup, { NormalizedTableGroupIdMap } from './tableGroup';
 import Table, { NormalizedTableIdMap } from './table';
@@ -57,6 +59,7 @@ export interface RawDatabase {
     notes: StickyNote[];
     enums: Enum[];
     refs: Ref[];
+    deps?: Dep[];
     tableGroups: TableGroup[];
     project: Project;
     records: RawTableRecord[];
@@ -84,7 +87,7 @@ declare class Database extends Element {
     checkSchema(schema: Schema): void;
     processSchemaElements(elements: Schema[] | Table[] | Enum[] | TableGroup[] | Ref[], elementType: any): void;
     findOrCreateSchema(schemaName: string): Schema;
-    findTable(rawTable: any): Table;
+    findTable(schemaName: string | null, tableName: string): Table;
     processTablePartials(rawTablePartials: any[]): TablePartial[];
     findTablePartial(partialName: string): TablePartial;
     export(): {
@@ -314,6 +317,8 @@ export interface NormalizedModel {
     schemas: NormalizedSchemaIdMap;
     endpoints: NormalizedEndpointIdMap;
     refs: NormalizedRefIdMap;
+    deps: NormalizedDepIdMap;
+    depEdges: NormalizedDepEdgeIdMap;
     fields: NormalizedFieldIdMap;
     tables: NormalizedTableIdMap;
     tableGroups: NormalizedTableGroupIdMap;
