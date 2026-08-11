@@ -109,6 +109,7 @@ const dbmlMonarchTokensProvider: MonarchLanguage = {
     'table',
     'enum',
     'ref',
+    'dep',
     'note',
     'tablepartial',
     'records',
@@ -189,6 +190,7 @@ const dbmlMonarchTokensProvider: MonarchLanguage = {
   settings: [
     'indexes',
     'ref',
+    'dep',
     'note',
     'headercolor',
     'pk',

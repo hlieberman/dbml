@@ -3,6 +3,7 @@ import Element, { RawNote, Token, Color } from './element';
 import Enum from './enum';
 import TableGroup from './tableGroup';
 import Ref from './ref';
+import Dep from './dep';
 import Database, { NormalizedModel } from './database';
 import DbState from './dbState';
 
@@ -12,6 +13,7 @@ export interface RawSchema {
     note?: RawNote;
     tables?: Table[];
     refs?: Ref[];
+    deps?: Dep[];
     enums?: Enum[];
     tableGroups?: TableGroup[];
     token?: Token;
@@ -25,6 +27,7 @@ declare class Schema extends Element {
     noteToken: Token;
     tables: Table[];
     refs: Ref[];
+    deps: Dep[];
     enums: Enum[];
     tableGroups: TableGroup[];
     database: Database;
@@ -184,6 +187,7 @@ export interface NormalizedSchema {
     tableIds: number[];
     noteIds: number[];
     refIds: number[];
+    depIds: number[];
     tableGroupIds: number[];
     enumIds: number[];
     databaseId: number;

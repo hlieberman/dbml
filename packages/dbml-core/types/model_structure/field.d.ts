@@ -2,6 +2,7 @@ import { NormalizedModel } from './database';
 import DbState from './dbState';
 import Element, { Token, RawNote } from './element';
 import Endpoint from './endpoint';
+import DepEdge from './dep_edge';
 import Enum from './enum';
 import Table from './table';
 import TablePartial from './tablePartial';
@@ -51,6 +52,7 @@ declare class Field extends Element {
     checks: Check[];
     table: Table;
     endpoints: Endpoint[];
+    depEdges: DepEdge[];
     _enum: Enum;
     injectedPartial?: TablePartial;
     injectedToken: Token;
@@ -59,6 +61,7 @@ declare class Field extends Element {
     constructor({ name, type, unique, pk, token, not_null, note, dbdefault, increment, checks, table, metadata }: RawField);
     generateId(): void;
     pushEndpoint(endpoint: any): void;
+    pushDepEdge(depEdge: DepEdge): void;
     processChecks(checks: any[]): void;
     export(): {
         name: string;
@@ -77,6 +80,7 @@ declare class Field extends Element {
     };
     exportChildIds(): {
         endpointIds: number[];
+        depEdgeIds: number[];
     };
     shallowExport(): {
         name: string;
@@ -111,6 +115,7 @@ export interface NormalizedField {
     };
     increment: boolean;
     endpointIds: number[];
+    depEdgeIds: number[];
     tableId: number;
     enumId: number | null;
     injectedPartialId: number | null;

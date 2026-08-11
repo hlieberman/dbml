@@ -5,8 +5,12 @@ import importer from './import';
 import exporter from './export';
 import {
   renameTable,
+  updateElementSetting,
+  updateElementSettingEdit,
   syncDiagramView,
   findDiagramViewBlocks,
+  syncDep,
+  findDepBlocks,
 } from './transform';
 import { VERSION } from './utils/version';
 
@@ -14,8 +18,12 @@ export {
   importer,
   exporter,
   renameTable,
+  updateElementSetting,
+  updateElementSettingEdit,
   syncDiagramView,
   findDiagramViewBlocks,
+  syncDep,
+  findDepBlocks,
   ModelExporter,
   CompilerError,
   Parser,
@@ -44,6 +52,8 @@ export {
   dbmlMonarchTokensProvider,
   DEFAULT_ENTRY,
   Filepath,
+  SymbolKind,
+  MetadataKind,
   // Relationship cardinality constants and utilities
   CARDINALITY_ONE,
   CARDINALITY_MAYBE,
@@ -67,7 +77,21 @@ export type {
   FilterConfig,
   DiagramViewSyncOperation,
   DiagramViewBlock,
+  DepSyncOperation,
+  DepSyncEdge,
+  DepEndpointRef,
+  DepBlock,
   TextEdit,
+  ElementIdentifier,
+  SchemaIdentifier,
+  TableIdentifier,
+  ColumnIdentifier,
+  EnumIdentifier,
+  EndpointRef,
+  RefIdentifier,
+  DepIdentifier,
+  NoteIdentifier,
+  TableGroupIdentifier,
   RelationCardinality,
   RelationshipOp,
 } from '@dbml/parse';

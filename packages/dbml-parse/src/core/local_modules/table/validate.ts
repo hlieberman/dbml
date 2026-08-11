@@ -29,6 +29,7 @@ import {
   isValidDefaultValue,
   isValidName,
   isValidPartialInjection,
+  isUnaryDependency,
 } from '@/core/utils/validate';
 import { TABLE_METADATA_FIELDS, COLUMN_METADATA_FIELDS } from '@/core/global_modules/table/interpret';
 import { validateCustomInlineMetadata } from '../metadata/utils';
@@ -224,6 +225,13 @@ export function validateTableSettings (settingList?: ListExpressionNode): Report
           }
         });
         break;
+      case SettingName.Dep:
+        attrs.forEach((attr) => {
+          if (!isUnaryDependency(attr.value)) {
+            errors.push(new CompileError(CompileErrorCode.INVALID_TABLE_SETTING_VALUE, '\'dep\' must be `-> target` or `<- source`', attr.value || attr.name!));
+          }
+        });
+        break;
       default:
         // Any non-builtin key is free-form inline custom metadata.
         errors.push(
@@ -391,6 +399,13 @@ export function validateFieldSetting (parts: ExpressionNode[]): Report<Settings>
         attrs.forEach((attr) => {
           if (!(attr.value instanceof FunctionExpressionNode)) {
             errors.push(new CompileError(CompileErrorCode.INVALID_COLUMN_SETTING_VALUE, '\'check\' must be a function expression', attr.value || attr.name!));
+          }
+        });
+        break;
+      case SettingName.Dep:
+        attrs.forEach((attr) => {
+          if (!isUnaryDependency(attr.value)) {
+            errors.push(new CompileError(CompileErrorCode.INVALID_COLUMN_SETTING_VALUE, '\'dep\' must be a valid unary relationship', attr.value || attr.name!));
           }
         });
         break;

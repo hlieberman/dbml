@@ -318,7 +318,7 @@ describe('[example] addSettingEdit on ElementDeclarationNode', () => {
     expect(source[edit!.start]).toBe(']');
   });
 
-  test('appends new settings block when none exists', () => {
+  test('inserts a new settings block before the body when none exists', () => {
     const source = 'Table users {}';
     const ast = parse(source).getValue()!.ast;
     const tableNode = ast.body.find((n): n is ElementDeclarationNode => n instanceof ElementDeclarationNode)!;
@@ -326,6 +326,8 @@ describe('[example] addSettingEdit on ElementDeclarationNode', () => {
 
     const edit = addSettingEdit(tableNode, 'headercolor: #fff');
     expect(edit).toBeDefined();
-    expect(edit!.newText).toBe(' [headercolor: #fff]');
+    // settings must precede the body, so the block goes in before `{`
+    expect(edit!.newText).toBe('[headercolor: #fff] ');
+    expect(source.slice(0, edit!.start) + edit!.newText + source.slice(edit!.end)).toBe('Table users [headercolor: #fff] {}');
   });
 });

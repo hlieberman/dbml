@@ -1,4 +1,5 @@
 import { get } from 'lodash-es';
+import Dep from './dep';
 import Element from './element';
 import Enum from './enum';
 import Ref from './ref';
@@ -16,6 +17,7 @@ class Schema extends Element {
   enums: Enum[];
   tableGroups: TableGroup[];
   refs: Ref[];
+  deps: Dep[];
   name: string;
   note: string | null;
   noteToken: Token | null;
@@ -25,13 +27,14 @@ class Schema extends Element {
   id!: number;
 
   constructor ({
-    name, alias, note, tables = [], refs = [], enums = [], tableGroups = [], token, database = {} as Database, noteToken = null,
+    name, alias, note, tables = [], refs = [], deps = [], enums = [], tableGroups = [], token, database = {} as Database, noteToken = null,
   }: Partial<RawSchema> = {}) {
     super(token);
     this.tables = [];
     this.enums = [];
     this.tableGroups = [];
     this.refs = [];
+    this.deps = [];
     this.name = name!;
     this.note = note ? get(note, 'value', typeof note === 'string' ? note : null) : null;
     this.noteToken = note ? get(note, 'token', noteToken) : null;
@@ -43,6 +46,7 @@ class Schema extends Element {
     this.processEnums(enums);
     this.processTables(tables);
     this.processRefs(refs);
+    this.processDeps(deps);
     this.processTableGroups(tableGroups);
   }
 
@@ -113,6 +117,16 @@ class Schema extends Element {
     }
   }
 
+  processDeps (rawDeps: any[]): void {
+    rawDeps.forEach((dep) => {
+      this.pushDep(new Dep({ ...dep, schema: this }));
+    });
+  }
+
+  pushDep (dep: Dep): void {
+    this.deps.push(dep);
+  }
+
   private processTableGroups (rawTableGroups: any[]): void {
     rawTableGroups.forEach((tableGroup) => {
       this.pushTableGroup(new TableGroup({ ...tableGroup, schema: this }));
@@ -150,6 +164,7 @@ class Schema extends Element {
       enums: this.enums.map((e) => e.export()),
       tableGroups: this.tableGroups.map((tg) => tg.export()),
       refs: this.refs.map((r) => r.export()),
+      deps: this.deps.map((d) => d.export()),
     };
   }
 
@@ -159,6 +174,7 @@ class Schema extends Element {
       enumIds: this.enums.map((e) => e.id),
       tableGroupIds: this.tableGroups.map((tg) => tg.id),
       refIds: this.refs.map((r) => r.id),
+      depIds: this.deps.map((d) => d.id),
     };
   }
 
@@ -188,6 +204,7 @@ class Schema extends Element {
     this.enums.forEach((_enum) => _enum.normalize(model));
     this.tableGroups.forEach((tableGroup) => tableGroup.normalize(model));
     this.refs.forEach((ref) => ref.normalize(model));
+    this.deps.forEach((dep) => dep.normalize(model));
   }
 }
 

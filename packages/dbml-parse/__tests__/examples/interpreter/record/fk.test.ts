@@ -173,7 +173,7 @@ describe('[example - record] composite foreign key constraints', () => {
     }); // status
   });
 
-  test('should validate many-to-many composite FK both directions', () => {
+  test('should validate FK for <> composite refs (both min=1)', () => {
     const source = `
       Table products {
         id int
@@ -978,5 +978,137 @@ describe('[example - record] FK skip validation for one side', () => {
     // products.region is injected from partial but is in a PK index on products
     // null in products.id should trigger FK violation
     expect(infos.some((w) => w.diagnostic.includes('must not be NULL'))).toBe(true);
+  });
+});
+
+describe('[example - record] many-to-many FK constraints', () => {
+  test('<> should validate FK existence in both directions', () => {
+    const source = `
+      Table students {
+        id int [pk]
+      }
+      Table courses {
+        id int [pk]
+      }
+      Ref: students.id <> courses.id
+
+      records students(id) {
+        1
+        2
+        3
+      }
+      records courses(id) {
+        10
+        20
+      }
+    `;
+    const result = interpret(source);
+    const warnings = result.getWarnings();
+    // students 1,2,3 don't exist in courses; courses 10,20 don't exist in students
+    expect(warnings.some((w) => w.diagnostic.includes('does not exist in courses.id'))).toBe(true);
+    expect(warnings.some((w) => w.diagnostic.includes('does not exist in students.id'))).toBe(true);
+  });
+
+  test('?<> should skip existence on left side (0..*) but validate on right side (1..*)', () => {
+    const source = `
+      Table tags {
+        id int [pk]
+      }
+      Table posts {
+        id int [pk]
+      }
+      Ref: tags.id ?<> posts.id
+
+      records tags(id) {
+        1
+      }
+      records posts(id) {
+        10
+        20
+      }
+    `;
+    const result = interpret(source);
+    const warnings = result.getWarnings();
+    // left is 0..*, right max = * -> skip existence for left (tags.id=1 not in posts is OK)
+    expect(warnings.filter((w) => w.diagnostic.includes('does not exist in posts.id')).length).toBe(0);
+    // right is 1..*, validates existence -> posts 10,20 must exist in tags
+    expect(warnings.some((w) => w.diagnostic.includes('does not exist in tags.id'))).toBe(true);
+  });
+
+  test('<>? should skip existence on right side (0..*) but validate on left side (1..*)', () => {
+    const source = `
+      Table tags {
+        id int [pk]
+      }
+      Table posts {
+        id int [pk]
+      }
+      Ref: tags.id <>? posts.id
+
+      records tags(id) {
+        1
+        2
+      }
+      records posts(id) {
+        10
+      }
+    `;
+    const result = interpret(source);
+    const warnings = result.getWarnings();
+    // right is 0..*, left max = * -> skip existence for right (posts.id=10 not in tags is OK)
+    expect(warnings.filter((w) => w.diagnostic.includes('does not exist in tags.id')).length).toBe(0);
+    // left is 1..*, validates existence -> tags 1,2 must exist in posts
+    expect(warnings.some((w) => w.diagnostic.includes('does not exist in posts.id'))).toBe(true);
+  });
+
+  test('?<>? should not validate FK existence, and should allow NULL on both sides', () => {
+    const source = `
+      Table tags {
+        id int [pk]
+      }
+      Table posts {
+        id int [pk]
+      }
+      Ref: tags.id ?<>? posts.id
+
+      records tags(id) {
+        null
+        1
+      }
+      records posts(id) {
+        null
+        10
+      }
+    `;
+    const result = interpret(source);
+    const warnings = result.getWarnings();
+    const fkWarnings = warnings.filter((w) => w.diagnostic.includes('FK violation'));
+    expect(fkWarnings.length).toBe(0);
+  });
+
+  test('<> should reject both NULL and non-existent values', () => {
+    const source = `
+      Table tags {
+        id int [pk]
+      }
+      Table posts {
+        id int [pk]
+      }
+      Ref: tags.id <> posts.id
+
+      records tags(id) {
+        null
+        1
+      }
+      records posts(id) {
+        10
+      }
+    `;
+    const result = interpret(source);
+    const warnings = result.getWarnings();
+    // <> has min=1 on both sides, so null should be rejected
+    expect(warnings.some((w) => w.diagnostic.includes('must not be null'))).toBe(true);
+    // non-existent values should also be rejected
+    expect(warnings.some((w) => w.diagnostic.includes('does not exist'))).toBe(true);
   });
 });
