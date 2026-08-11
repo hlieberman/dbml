@@ -16,12 +16,13 @@ export default defineConfig(
   [
     {
       ignores: [
-        'node_modules/*',
-        'lib/*',
-        'types/*',
-        'src/parse/deprecated/*',
-        'src/parse/ANTLR/parsers/*',
-        '__tests__/*',
+        'node_modules/**',
+        'lib/**',
+        'types/**',
+        'src/parse/deprecated/**',
+        'src/parse/ANTLR/parsers/**',
+        '__tests__/**',
+        '__benchmarks__/**',
         'eslint.config.ts',
       ],
     },
