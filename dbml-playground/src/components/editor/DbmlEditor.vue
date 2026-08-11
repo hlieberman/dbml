@@ -105,7 +105,7 @@ function editorConfig (): monaco.editor.IStandaloneEditorConstructionOptions {
       enabled: false,
     },
     wordWrap: 'on',
-    scrollBeyondLastLine: false,
+    scrollBeyondLastLine: true,
     fontSize: 14,
     lineHeight: 20,
     tabSize: 2,

@@ -67,7 +67,7 @@ function onDiagnosticJump (diag: ParserDiagnostic) {
     endColumn: diag.endLocation.column,
   };
   editor.setSelection(range);
-  editor.revealRangeInCenter(range);
+  editor.revealRangeAtTop(range);
   editor.focus();
 }
 
