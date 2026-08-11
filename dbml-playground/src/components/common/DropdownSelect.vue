@@ -4,6 +4,7 @@
     :distance="4"
     placement="bottom-start"
     :arrow-padding="0"
+    :container="container"
     no-auto-focus
   >
     <button
@@ -20,7 +21,7 @@
           :key="i"
           class="w-full text-left px-3 py-1.5 text-xs cursor-pointer"
           :class="modelValue === i ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'"
-          @click="select(i)"
+          @click.stop="select(i)"
         >
           {{ option }}
         </button>
@@ -30,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, useTemplateRef } from 'vue';
 
 const props = defineProps<{
   options: readonly string[];
@@ -43,6 +44,16 @@ const emit = defineEmits<{
 }>();
 
 const dropdown = ref<any>(null);
+
+// Find the nearest parent popper container to teleport into,
+// so floating-vue recognizes this as a nested dropdown
+const container = ref<HTMLElement | string>('body');
+
+onMounted(() => {
+  const el = dropdown.value?.$el as HTMLElement | undefined;
+  const parentPopper = el?.closest('.v-popper__popper') as HTMLElement | null;
+  if (parentPopper) container.value = parentPopper;
+});
 
 const selectedLabel = computed(() => (props.labels ?? props.options)[props.modelValue] ?? '');
 
