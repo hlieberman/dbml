@@ -114,11 +114,11 @@ describe('[example - record] type compatibility validation', () => {
 
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(5);
-      expect(infos[0].diagnostic).toBe("Invalid boolean value for column `active`");
-      expect(infos[1].diagnostic).toBe("Invalid boolean value for column `active`");
-      expect(infos[2].diagnostic).toBe("Invalid boolean value for column `active`");
-      expect(infos[3].diagnostic).toBe("Invalid boolean value for column `active`");
-      expect(infos[4].diagnostic).toBe("Invalid boolean value for column `active`");
+      expect(infos[0].diagnostic).toBe('Invalid boolean value for column `active`');
+      expect(infos[1].diagnostic).toBe('Invalid boolean value for column `active`');
+      expect(infos[2].diagnostic).toBe('Invalid boolean value for column `active`');
+      expect(infos[3].diagnostic).toBe('Invalid boolean value for column `active`');
+      expect(infos[4].diagnostic).toBe('Invalid boolean value for column `active`');
     });
   });
 
@@ -209,10 +209,10 @@ describe('[example - record] type compatibility validation', () => {
 
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(4);
-      expect(infos[0].diagnostic).toBe("Invalid numeric value for column `id`");
-      expect(infos[1].diagnostic).toBe("Invalid integer value `10.5` for column `quantity`: expected integer, got decimal");
-      expect(infos[2].diagnostic).toBe("Invalid numeric value for column `price`");
-      expect(infos[3].diagnostic).toBe("Invalid numeric value for column `price`");
+      expect(infos[0].diagnostic).toBe('Invalid numeric value for column `id`');
+      expect(infos[1].diagnostic).toBe('Invalid integer value `10.5` for column `quantity`: expected integer, got decimal');
+      expect(infos[2].diagnostic).toBe('Invalid numeric value for column `price`');
+      expect(infos[3].diagnostic).toBe('Invalid numeric value for column `price`');
     });
 
     test('- should validate decimal precision and scale', () => {
@@ -309,11 +309,11 @@ describe('[example - record] type compatibility validation', () => {
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(5);
       expect(infos[0].code).toBe(CompileErrorCode.INVALID_RECORDS_FIELD);
-      expect(infos[0].diagnostic).toBe("String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 12 bytes");
-      expect(infos[1].diagnostic).toBe("String value for column `code` exceeds maximum length: expected at most 3 bytes (UTF-8), got 4 bytes");
-      expect(infos[2].diagnostic).toBe("String value for column `title` exceeds maximum length: expected at most 10 bytes (UTF-8), got 13 bytes");
-      expect(infos[3].diagnostic).toBe("String value for column `shortcode` exceeds maximum length: expected at most 4 bytes (UTF-8), got 7 bytes");
-      expect(infos[4].diagnostic).toBe("String value for column `description` exceeds maximum length: expected at most 8 bytes (UTF-8), got 11 bytes");
+      expect(infos[0].diagnostic).toBe('String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 12 bytes');
+      expect(infos[1].diagnostic).toBe('String value for column `code` exceeds maximum length: expected at most 3 bytes (UTF-8), got 4 bytes');
+      expect(infos[2].diagnostic).toBe('String value for column `title` exceeds maximum length: expected at most 10 bytes (UTF-8), got 13 bytes');
+      expect(infos[3].diagnostic).toBe('String value for column `shortcode` exceeds maximum length: expected at most 4 bytes (UTF-8), got 7 bytes');
+      expect(infos[4].diagnostic).toBe('String value for column `description` exceeds maximum length: expected at most 8 bytes (UTF-8), got 11 bytes');
     });
 
     test('- should accept strings within length and exact length', () => {
@@ -545,8 +545,8 @@ describe('[example - record] type compatibility validation', () => {
 
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(2);
-      expect(infos[0].diagnostic).toBe("NULL not allowed for NOT NULL column `name` without a default value or auto-increment");
-      expect(infos[1].diagnostic).toBe("NULL not allowed for NOT NULL column `status` without a default value or auto-increment");
+      expect(infos[0].diagnostic).toBe('NULL not allowed for NOT NULL column `name` without a default value or auto-increment');
+      expect(infos[1].diagnostic).toBe('NULL not allowed for NOT NULL column `status` without a default value or auto-increment');
     });
 
     test('- should allow NULL for NOT NULL column with default or increment', () => {
@@ -627,8 +627,8 @@ describe('[example - record] type compatibility validation', () => {
 
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(2);
-      expect(infos[0].diagnostic).toContain("Invalid datetime value for column `created_at`");
-      expect(infos[1].diagnostic).toContain("Invalid datetime value for column `created_at`");
+      expect(infos[0].diagnostic).toContain('Invalid datetime value for column `created_at`');
+      expect(infos[1].diagnostic).toContain('Invalid datetime value for column `created_at`');
     });
   });
 
@@ -756,7 +756,7 @@ describe('[example - record] type compatibility validation', () => {
 
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(1);
-      expect(infos[0].diagnostic).toBe("Invalid enum value for column `status`");
+      expect(infos[0].diagnostic).toBe('Invalid enum value for column `status`');
     });
 
     test('- should validate enum from table partial', () => {
@@ -815,12 +815,12 @@ describe('[example - record] type compatibility validation', () => {
 
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(6);
-      expect(infos[0].diagnostic).toBe("Invalid numeric value for column `id`");
-      expect(infos[1].diagnostic).toBe("Invalid integer value `10.5` for column `quantity`: expected integer, got decimal");
-      expect(infos[2].diagnostic).toBe("String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 12 bytes");
-      expect(infos[3].diagnostic).toBe("Numeric value `12345.67` for column `price` exceeds precision: expected at most 5 total digits, got 7");
-      expect(infos[4].diagnostic).toBe("Invalid boolean value for column `active`");
-      expect(infos[5].diagnostic).toBe("Invalid enum value for column `status`");
+      expect(infos[0].diagnostic).toBe('Invalid numeric value for column `id`');
+      expect(infos[1].diagnostic).toBe('Invalid integer value `10.5` for column `quantity`: expected integer, got decimal');
+      expect(infos[2].diagnostic).toBe('String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 12 bytes');
+      expect(infos[3].diagnostic).toBe('Numeric value `12345.67` for column `price` exceeds precision: expected at most 5 total digits, got 7');
+      expect(infos[4].diagnostic).toBe('Invalid boolean value for column `active`');
+      expect(infos[5].diagnostic).toBe('Invalid enum value for column `status`');
     });
 
     test('- should validate across multiple records', () => {
@@ -844,9 +844,9 @@ describe('[example - record] type compatibility validation', () => {
 
       expect(errors.length).toBe(0);
       expect(infos.length).toBe(3);
-      expect(infos[0].diagnostic).toBe("String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 11 bytes");
-      expect(infos[1].diagnostic).toBe("Invalid integer value `30.5` for column `quantity`: expected integer, got decimal");
-      expect(infos[2].diagnostic).toBe("String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 9 bytes");
+      expect(infos[0].diagnostic).toBe('String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 11 bytes');
+      expect(infos[1].diagnostic).toBe('Invalid integer value `30.5` for column `quantity`: expected integer, got decimal');
+      expect(infos[2].diagnostic).toBe('String value for column `name` exceeds maximum length: expected at most 5 bytes (UTF-8), got 9 bytes');
     });
   });
 });

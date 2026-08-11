@@ -24,7 +24,6 @@ import {
   toKeyedRows,
 } from './helper';
 
-
 // Validate primary key constraints for a table's records.
 export function validatePrimaryKey (compiler: Compiler, tableSymbol: TableSymbol, recordBlock: SyntaxNode, record: TableRecord): CompileInfo[] {
   if (isEmpty(record.values)) return [];
