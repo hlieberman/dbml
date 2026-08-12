@@ -59,13 +59,29 @@
             class="flex gap-2 mt-2 text-[13px]"
             style="font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"
           >
-            <div class="flex-1 border-l-[3px] bg-gray-100 rounded-r px-3 py-2" style="border-color: #f87171;">
-              <div class="text-[10px] font-semibold text-red-500 uppercase tracking-wider mb-1">Now</div>
-              <pre class="text-gray-700 whitespace-pre-wrap leading-5" v-html="preview.beforeHtml" />
+            <div
+              class="flex-1 border-l-[3px] bg-gray-100 rounded-r px-3 py-2"
+              style="border-color: #f87171;"
+            >
+              <div class="text-[10px] font-semibold text-red-500 uppercase tracking-wider mb-1">
+                Now
+              </div>
+              <pre
+                class="text-gray-700 whitespace-pre-wrap leading-5"
+                v-html="preview.beforeHtml"
+              />
             </div>
-            <div class="flex-1 border-l-[3px] bg-gray-100 rounded-r px-3 py-2" style="border-color: #22c55e;">
-              <div class="text-[10px] font-semibold text-green-600 uppercase tracking-wider mb-1">Fixed</div>
-              <pre class="text-gray-700 whitespace-pre-wrap leading-5" v-html="preview.afterHtml" />
+            <div
+              class="flex-1 border-l-[3px] bg-gray-100 rounded-r px-3 py-2"
+              style="border-color: #22c55e;"
+            >
+              <div class="text-[10px] font-semibold text-green-600 uppercase tracking-wider mb-1">
+                Fixed
+              </div>
+              <pre
+                class="text-gray-700 whitespace-pre-wrap leading-5"
+                v-html="preview.afterHtml"
+              />
             </div>
           </div>
         </div>
