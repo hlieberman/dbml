@@ -33,6 +33,7 @@
           :severity="item.severity"
           :expanded="expandedDiag === item.diagnostic"
           :source="source"
+          :popper-container="popperContainer"
           @click="onEntryClick(item)"
           @apply-fix="emit('apply-fix', { diagnostic: item.diagnostic, fix: $event })"
         />
@@ -71,6 +72,7 @@ const props = defineProps<{
   warnings: readonly ParserDiagnostic[];
   infos: readonly ParserDiagnostic[];
   source: string;
+  popperContainer?: HTMLElement;
 }>();
 
 const emit = defineEmits<{
@@ -119,4 +121,3 @@ function onEntryClick (item: DiagnosticItem) {
   }
 }
 </script>
-

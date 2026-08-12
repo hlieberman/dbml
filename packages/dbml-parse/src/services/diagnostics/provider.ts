@@ -118,9 +118,9 @@ export default class DBMLDiagnosticsProvider {
       ?.filter((f) => f.edits.length > 0)
       .map((f) => ({
         title: f.title,
-        ...(f.shortTitle ? { shortTitle: f.shortTitle } : {}),
+        shortTitle: f?.shortTitle,
         edits: f.edits.map((e) => ({ start: e.start, end: e.end, newText: e.newText })),
-        ...(f.isPreferred ? { isPreferred: true } : {}),
+        isPreferred: f.isPreferred,
       }));
 
     return {
@@ -131,10 +131,10 @@ export default class DBMLDiagnosticsProvider {
       endRow: endPos.line + 1,
       endColumn: endPos.column + 1,
       code: errorOrWarning.code,
-      ...(details?.category ? { category: details.category } : {}),
-      ...(details?.explanation ? { explanation: details.explanation } : {}),
+      category: details?.category,
+      explanation: details?.explanation,
       filepath: errorOrWarning.filepath,
-      ...(quickFixes?.length ? { quickFixes } : {}),
+      quickFixes,
     };
   }
 

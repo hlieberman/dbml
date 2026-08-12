@@ -34,6 +34,7 @@
       <!-- Panel popover -->
       <template #popper>
         <div
+          ref="panelContainerRef"
           class="w-[480px]"
           style="height: 60vh; min-height: 300px; max-height: 700px;"
         >
@@ -42,6 +43,7 @@
             :warnings="warnings"
             :infos="infos"
             :source="source"
+            :popper-container="panelContainerRef"
             @diagnostic-jump="emit('diagnostic-jump', $event)"
             @apply-fix="emit('apply-fix', $event)"
           />
@@ -70,6 +72,7 @@ const emit = defineEmits<{
 }>();
 
 const expanded = ref(false);
+const panelContainerRef = ref<HTMLElement>();
 
 const totalCount = computed(() => props.errors.length + props.warnings.length + props.infos.length);
 

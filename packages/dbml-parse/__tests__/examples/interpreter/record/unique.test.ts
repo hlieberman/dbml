@@ -93,10 +93,10 @@ describe('[example - record] composite unique constraints', () => {
     const result = interpret(source);
     const infos = result.getInfos();
 
-    // One warning per UNIQUE column per duplicate row -> 2 rows × 2 columns = 4.
+    // One info per UNIQUE column per duplicate row -> 2 rows × 2 columns = 4.
     expect(infos.length).toBe(4);
-    for (const w of infos) {
-      expect(w.diagnostic).toBe('Duplicate Composite UNIQUE: `(user_profiles.user_id, user_profiles.profile_type)` = `(1, "work")`');
+    for (const info of infos) {
+      expect(info.diagnostic).toBe('Duplicate Composite UNIQUE: `(user_profiles.user_id, user_profiles.profile_type)` = `(1, "work")`');
     }
   });
 
@@ -326,9 +326,9 @@ describe('[example - record] simple unique constraints', () => {
     expect(infos.length).toBeGreaterThan(0);
 
     // Verify users.email duplicate infos
-    const userWarnings = infos.filter((w) => w.diagnostic.includes('users.email') && w.diagnostic.includes('alice@example.com'));
+    const userWarnings = infos.filter((i) => i.diagnostic.includes('users.email') && i.diagnostic.includes('alice@example.com'));
     expect(userWarnings.length).toBeGreaterThan(0);
-    expect(userWarnings.every((w) => w.diagnostic.includes('Duplicate UNIQUE'))).toBe(true);
+    expect(userWarnings.every((i) => i.diagnostic.includes('Duplicate UNIQUE'))).toBe(true);
 
     // Verify products.sku duplicate infos
     const productWarnings = infos.filter((w) => w.diagnostic.includes('products.sku') && w.diagnostic.includes('PROD-001'));
@@ -427,8 +427,8 @@ describe('[example - record] simple unique constraints', () => {
     // username "alice" is duplicate (rows 1 and 3) and phone "111-111" is duplicate (rows 1 and 4)
     // Each duplicate generates one warning per affected row
     expect(infos.length).toBeGreaterThan(0);
-    expect(infos.some((w) => w.diagnostic.includes('users.username') && w.diagnostic.includes('alice'))).toBe(true);
-    expect(infos.some((w) => w.diagnostic.includes('users.phone') && w.diagnostic.includes('111-111'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('users.username') && i.diagnostic.includes('alice'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('users.phone') && i.diagnostic.includes('111-111'))).toBe(true);
   });
 
   test('should report error for duplicate records blocks', () => {

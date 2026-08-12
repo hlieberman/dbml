@@ -89,8 +89,6 @@ function onApplyFix ({ fix }: { diagnostic: ParserDiagnostic; fix: QuickFixActio
   model.pushEditOperations([], edits, () => null);
 }
 
-
-
 function onRenameTable ({ oldName, newName }: { oldName: string; newName: string }) {
   const filepath = Filepath.fromUri(monaco.Uri.file(project.currentFile).toString());
   const changes = parser.compiler.renameTable(filepath, oldName, newName);

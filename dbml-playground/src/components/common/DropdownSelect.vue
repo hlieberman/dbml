@@ -12,7 +12,13 @@
       @click.stop
     >
       <span class="truncate">{{ selectedLabel }}</span>
-      <svg class="w-3 h-3 text-gray-400 flex-shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5L6 7.5L9 4.5" /></svg>
+      <svg
+        class="w-3 h-3 text-gray-400 flex-shrink-0"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      ><path d="M3 4.5L6 7.5L9 4.5" /></svg>
     </button>
     <template #popper>
       <div class="py-1 max-w-[16rem]">
@@ -31,12 +37,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, useTemplateRef } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
   options: readonly string[];
   labels?: readonly string[];
   modelValue: number;
+  container?: HTMLElement;
 }>();
 
 const emit = defineEmits<{
@@ -44,16 +51,6 @@ const emit = defineEmits<{
 }>();
 
 const dropdown = ref<any>(null);
-
-// Find the nearest parent popper container to teleport into,
-// so floating-vue recognizes this as a nested dropdown
-const container = ref<HTMLElement | string>('body');
-
-onMounted(() => {
-  const el = dropdown.value?.$el as HTMLElement | undefined;
-  const parentPopper = el?.closest('.v-popper__popper') as HTMLElement | null;
-  if (parentPopper) container.value = parentPopper;
-});
 
 const selectedLabel = computed(() => (props.labels ?? props.options)[props.modelValue] ?? '');
 

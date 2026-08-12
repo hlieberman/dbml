@@ -117,7 +117,6 @@ interface Tab {
   icon: Component;
 }
 
-
 const TABS: Tab[] = [
   {
     id: OutputTabId.Tokens,

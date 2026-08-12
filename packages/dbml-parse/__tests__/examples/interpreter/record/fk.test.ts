@@ -937,7 +937,7 @@ describe('[example - record] FK skip validation for one side', () => {
 
     // merchants.(id, country_code) is a composite PK index
     // null in merchants.id should trigger FK violation (must not be NULL)
-    expect(infos.some((w) => w.diagnostic.includes('must not be NULL'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('must not be NULL'))).toBe(true);
   });
 
   test('should treat injected column in pk index as not nullable', () => {
@@ -977,7 +977,7 @@ describe('[example - record] FK skip validation for one side', () => {
 
     // products.region is injected from partial but is in a PK index on products
     // null in products.id should trigger FK violation
-    expect(infos.some((w) => w.diagnostic.includes('must not be NULL'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('must not be NULL'))).toBe(true);
   });
 });
 
@@ -1003,10 +1003,10 @@ describe('[example - record] many-to-many FK constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
     // students 1,2,3 don't exist in courses; courses 10,20 don't exist in students
-    expect(warnings.some((w) => w.diagnostic.includes('does not exist in courses.id'))).toBe(true);
-    expect(warnings.some((w) => w.diagnostic.includes('does not exist in students.id'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('does not exist in `courses.id`'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('does not exist in `students.id`'))).toBe(true);
   });
 
   test('?<> should skip existence on left side (0..*) but validate on right side (1..*)', () => {
@@ -1028,11 +1028,11 @@ describe('[example - record] many-to-many FK constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
     // left is 0..*, right max = * -> skip existence for left (tags.id=1 not in posts is OK)
-    expect(warnings.filter((w) => w.diagnostic.includes('does not exist in posts.id')).length).toBe(0);
+    expect(infos.filter((i) => i.diagnostic.includes('does not exist in `posts.id`')).length).toBe(0);
     // right is 1..*, validates existence -> posts 10,20 must exist in tags
-    expect(warnings.some((w) => w.diagnostic.includes('does not exist in tags.id'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('does not exist in `tags.id`'))).toBe(true);
   });
 
   test('<>? should skip existence on right side (0..*) but validate on left side (1..*)', () => {
@@ -1054,11 +1054,11 @@ describe('[example - record] many-to-many FK constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
     // right is 0..*, left max = * -> skip existence for right (posts.id=10 not in tags is OK)
-    expect(warnings.filter((w) => w.diagnostic.includes('does not exist in tags.id')).length).toBe(0);
+    expect(infos.filter((i) => i.diagnostic.includes('does not exist in `tags.id`')).length).toBe(0);
     // left is 1..*, validates existence -> tags 1,2 must exist in posts
-    expect(warnings.some((w) => w.diagnostic.includes('does not exist in posts.id'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('does not exist in `posts.id`'))).toBe(true);
   });
 
   test('?<>? should not validate FK existence, and should allow NULL on both sides', () => {
@@ -1105,10 +1105,10 @@ describe('[example - record] many-to-many FK constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
     // <> has min=1 on both sides, so null should be rejected
-    expect(warnings.some((w) => w.diagnostic.includes('must not be null'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('must not be NULL'))).toBe(true);
     // non-existent values should also be rejected
-    expect(warnings.some((w) => w.diagnostic.includes('does not exist'))).toBe(true);
+    expect(infos.some((i) => i.diagnostic.includes('does not exist'))).toBe(true);
   });
 });

@@ -43,6 +43,7 @@
               v-model="selectedFixIndex"
               :options="fixTitles"
               :labels="fixLabels"
+              :container="popperContainer"
               @click.stop
             />
             <button
@@ -102,6 +103,7 @@ const props = defineProps<{
   severity: DiagnosticSeverity;
   expanded: boolean;
   source: string;
+  popperContainer?: HTMLElement;
 }>();
 
 const emit = defineEmits<{
