@@ -118,7 +118,7 @@ export default class DBMLDiagnosticsProvider {
       ?.filter((f) => f.edits.length > 0)
       .map((f) => ({
         title: f.title,
-        shortTitle: f?.shortTitle,
+        shortTitle: f.shortTitle,
         edits: f.edits.map((e) => ({ start: e.start, end: e.end, newText: e.newText })),
         isPreferred: f.isPreferred,
       }));
