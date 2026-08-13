@@ -6,6 +6,13 @@ import type { SyntaxToken } from '@/core/types/tokens';
 import { MarkerData, MarkerSeverity } from '@/services/types';
 
 // This is the same format that dbdiagram-frontend uses
+export interface DiagnosticQuickFix {
+  title: string;
+  shortTitle?: string;
+  edits: { start: number; end: number; newText: string }[];
+  isPreferred?: boolean;
+}
+
 export interface Diagnostic {
   type: 'error' | 'warning' | 'info';
   text: string;
@@ -14,7 +21,10 @@ export interface Diagnostic {
   endRow: number;
   endColumn: number;
   code?: string | number;
+  category?: string;
+  explanation?: string;
   filepath: Filepath;
+  quickFixes?: DiagnosticQuickFix[];
 }
 
 export default class DBMLDiagnosticsProvider {
@@ -103,6 +113,16 @@ export default class DBMLDiagnosticsProvider {
     const startPos = item.startPos;
     const endPos = item.endPos;
 
+    const details = errorOrWarning.details;
+    const quickFixes = details?.quickFixes
+      ?.filter((f) => f.edits.length > 0)
+      .map((f) => ({
+        title: f.title,
+        shortTitle: f.shortTitle,
+        edits: f.edits.map((e) => ({ start: e.start, end: e.end, newText: e.newText })),
+        isPreferred: f.isPreferred,
+      }));
+
     return {
       type: severity,
       text: errorOrWarning.diagnostic,
@@ -111,7 +131,10 @@ export default class DBMLDiagnosticsProvider {
       endRow: endPos.line + 1,
       endColumn: endPos.column + 1,
       code: errorOrWarning.code,
+      category: details?.category,
+      explanation: details?.explanation,
       filepath: errorOrWarning.filepath,
+      quickFixes,
     };
   }
 

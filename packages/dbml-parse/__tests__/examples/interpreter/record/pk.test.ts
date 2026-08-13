@@ -21,9 +21,9 @@ describe('[example - record] composite primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(0);
+    expect(infos.length).toBe(0);
 
     const db = result.getValue()!;
     expect(db.records.length).toBe(1);
@@ -91,13 +91,13 @@ describe('[example - record] composite primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    // One warning per PK column per duplicate row -> 2 rows × 2 columns = 4,
+    // One info per PK column per duplicate row -> 2 rows × 2 columns = 4,
     // each anchored on the offending row's column cell.
-    expect(warnings.length).toBe(4);
-    for (const w of warnings) {
-      expect(w.diagnostic).toBe('Duplicate Composite PK: (order_items.order_id, order_items.product_id) = (1, 100)');
+    expect(infos.length).toBe(4);
+    for (const info of infos) {
+      expect(info.diagnostic).toBe('Duplicate Composite PK: `(order_items.order_id, order_items.product_id)` = `(1, 100)`');
     }
   });
 
@@ -119,13 +119,13 @@ describe('[example - record] composite primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(4);
-    expect(warnings[0].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
-    expect(warnings[1].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
-    expect(warnings[2].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
-    expect(warnings[3].diagnostic).toBe('NULL in Composite PK: (order_items.order_id, order_items.product_id) cannot be NULL');
+    expect(infos.length).toBe(4);
+    expect(infos[0].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
+    expect(infos[1].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
+    expect(infos[2].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
+    expect(infos[3].diagnostic).toBe('NULL in Composite PK: `(order_items.order_id, order_items.product_id)` cannot be NULL');
   });
 });
 
@@ -159,9 +159,9 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(0);
+    expect(infos.length).toBe(0);
 
     const db = result.getValue();
     if (!db || !db.records) {
@@ -244,18 +244,18 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    // Should have warnings for duplicate PKs
-    expect(warnings.length).toBeGreaterThan(0);
+    // Should have infos for duplicate PKs
+    expect(infos.length).toBeGreaterThan(0);
 
-    // Verify users.id duplicate warnings
-    const userWarnings = warnings.filter((w) => w.diagnostic.includes('users.id'));
+    // Verify users.id duplicate infos
+    const userWarnings = infos.filter((w) => w.diagnostic.includes('users.id'));
     expect(userWarnings.length).toBeGreaterThan(0);
     expect(userWarnings.every((w) => w.diagnostic.includes('Duplicate PK'))).toBe(true);
 
-    // Verify countries.code duplicate warnings
-    const countryWarnings = warnings.filter((w) => w.diagnostic.includes('countries.code'));
+    // Verify countries.code duplicate infos
+    const countryWarnings = infos.filter((w) => w.diagnostic.includes('countries.code'));
     expect(countryWarnings.length).toBeGreaterThan(0);
     expect(countryWarnings.every((w) => w.diagnostic.includes('Duplicate PK'))).toBe(true);
   });
@@ -272,10 +272,10 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(1);
-    expect(warnings[0].diagnostic).toBe('NULL in PK: users.id cannot be NULL');
+    expect(infos.length).toBe(1);
+    expect(infos[0].diagnostic).toBe('NULL in PK: `users.id` cannot be NULL');
   });
 
   test('should not crash when simple PK with default is unspecified and records have duplicates', () => {
@@ -290,12 +290,12 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
     // id defaults to 0 for both rows, so both have PK = 0 - duplicates
-    expect(warnings.length).toBeGreaterThanOrEqual(1);
-    expect(warnings[0].diagnostic).toContain('Duplicate PK');
-    expect(warnings[0].diagnostic).toContain('= 0');
+    expect(infos.length).toBeGreaterThanOrEqual(1);
+    expect(infos[0].diagnostic).toContain('Duplicate PK');
+    expect(infos[0].diagnostic).toContain('= `0`');
   });
 
   test('should not crash when simple PK with increment is unspecified', () => {
@@ -310,10 +310,10 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    // id is auto-increment, each row gets a unique PK - no warnings
-    expect(warnings.length).toBe(0);
+    // id is auto-increment, each row gets a unique PK - no infos
+    expect(infos.length).toBe(0);
   });
 
   test('should not crash when composite PK has unspecified increment column with null in specified column', () => {
@@ -332,10 +332,10 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBeGreaterThanOrEqual(1);
-    expect(warnings[0].diagnostic).toContain('NULL');
+    expect(infos.length).toBeGreaterThanOrEqual(1);
+    expect(infos[0].diagnostic).toContain('NULL');
   });
 
   test('should not crash when composite PK has unspecified default column with null in specified column', () => {
@@ -354,10 +354,10 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBeGreaterThanOrEqual(1);
-    expect(warnings[0].diagnostic).toContain('NULL');
+    expect(infos.length).toBeGreaterThanOrEqual(1);
+    expect(infos[0].diagnostic).toContain('NULL');
   });
 
   test('should not crash when composite PK has unspecified increment column with duplicates in specified column', () => {
@@ -376,10 +376,10 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    // id is auto-increment, so each row gets a unique (id, tenant_id) pair - no warnings
-    expect(warnings.length).toBe(0);
+    // id is auto-increment, so each row gets a unique (id, tenant_id) pair - no infos
+    expect(infos.length).toBe(0);
   });
 
   test('should not crash when composite PK has unspecified default column with duplicates in specified column', () => {
@@ -398,12 +398,12 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
     // id defaults to 0 for both rows, so (0, 1) and (0, 1) are duplicates
-    expect(warnings.length).toBeGreaterThanOrEqual(1);
-    expect(warnings[0].diagnostic).toContain('Duplicate');
-    expect(warnings[0].diagnostic).toContain('(0, 1)');
+    expect(infos.length).toBeGreaterThanOrEqual(1);
+    expect(infos[0].diagnostic).toContain('Duplicate');
+    expect(infos[0].diagnostic).toContain('(0, 1)');
   });
 
   test('should validate PK alias syntax (primary key)', () => {
@@ -418,9 +418,9 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(0);
+    expect(infos.length).toBe(0);
 
     const db = result.getValue()!;
     expect(db.records[0].values.length).toBe(2);
@@ -447,9 +447,9 @@ describe('[example - record] simple primary key constraints', () => {
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(0);
+    expect(infos.length).toBe(0);
 
     const db = result.getValue()!;
     expect(db.records[0].values.length).toBe(3);

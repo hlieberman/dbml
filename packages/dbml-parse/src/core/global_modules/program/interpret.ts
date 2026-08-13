@@ -80,7 +80,7 @@ export default class ProgramInterpreter {
     this.interpretAllMetadata();
     this.interpretAllAliases();
     this.validatePartialRefs();
-    this.warnings.push(...this.validateRecords());
+    this.infos.push(...this.validateRecords());
     return new Report(this.db, this.errors, this.warnings, this.infos);
   }
 
@@ -315,8 +315,8 @@ export default class ProgramInterpreter {
     }
   }
 
-  private validateRecords (): CompileWarning[] {
-    const warnings: CompileWarning[] = [];
+  private validateRecords (): CompileInfo[] {
+    const infos: CompileInfo[] = [];
     const fkTableMap = new Map<InternedNodeSymbol, TableInfo>();
 
     // Seed fkTableMap with ALL table symbols (record = undefined)
@@ -351,8 +351,8 @@ export default class ProgramInterpreter {
       const record = result.getValue() as TableRecord | undefined;
       if (!record) continue;
 
-      warnings.push(...validatePrimaryKey(this.compiler, tableSymbol, meta.declaration, record));
-      warnings.push(...validateUnique(this.compiler, tableSymbol, record));
+      infos.push(...validatePrimaryKey(this.compiler, tableSymbol, meta.declaration, record));
+      infos.push(...validateUnique(this.compiler, tableSymbol, record));
 
       const key = tableSymbol.originalSymbol.intern();
       const entry = fkTableMap.get(key);
@@ -365,11 +365,11 @@ export default class ProgramInterpreter {
     }
 
     const partialRefs = this.collectPartialRefs(fkTableMap);
-    warnings.push(...validateForeignKeys(this.compiler, [
+    infos.push(...validateForeignKeys(this.compiler, [
       ...this.db.refs,
       ...partialRefs,
     ], fkTableMap, this.filepath));
-    return warnings;
+    return infos;
   }
 
   private validatePartialRefs () {

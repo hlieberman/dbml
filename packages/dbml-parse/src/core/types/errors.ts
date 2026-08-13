@@ -156,10 +156,50 @@ export interface RelatedLocation {
   message: string;
 }
 
-export class CompileError extends Error {
+export interface QuickFix {
+  title: string;
+  shortTitle?: string; // compact label for select boxes (e.g. "Add not null")
+  filepath: Filepath;
+  edits: TextEdit[];
+  isPreferred?: boolean; // used by "Fix all" to pick the default fix
+}
+
+export enum DiagnosticCategory {
+  // Column nullability or uniqueness doesn't match the ref operator (>, <, -, <>)
+  RefColumnMismatch = 'Mismatched optional ref constraints',
+
+  // Record value has wrong type for its column (e.g. string in integer column, invalid enum value)
+  RecordValueTypeMismatch = 'Record type errors',
+
+  // Record data violates a table constraint (PK null/duplicate, FK not found, unique duplicate)
+  RecordConstraintViolation = 'Record constraint violations',
+
+  // Diagnostics that don't fit a specific category
+  Other = 'Other',
+}
+
+export interface CompileDetails {
+  category?: DiagnosticCategory;
+  explanation?: string;
+  quickFixes?: QuickFix[];
+}
+
+export interface CompileDiagnostic extends Error {
+  code: Readonly<CompileErrorCode>;
+  diagnostic: Readonly<string>;
+  details?: Readonly<CompileDetails>;
+  nodeOrToken: Readonly<SyntaxNode | SyntaxToken>;
+  start: Readonly<number>;
+  end: Readonly<number>;
+  filepath: Filepath;
+}
+
+export class CompileError extends Error implements CompileDiagnostic {
   code: Readonly<CompileErrorCode>;
 
   diagnostic: Readonly<string>;
+
+  details?: Readonly<CompileDetails>;
 
   nodeOrToken: Readonly<SyntaxNode | SyntaxToken>;
 
@@ -167,10 +207,11 @@ export class CompileError extends Error {
 
   end: Readonly<number>;
 
-  constructor (code: number, message: string, nodeOrToken: SyntaxNode | SyntaxToken) {
+  constructor (code: number, message: string, nodeOrToken: SyntaxNode | SyntaxToken, details?: CompileDetails) {
     super(message);
     this.code = code;
     this.diagnostic = message;
+    this.details = details;
     this.nodeOrToken = nodeOrToken;
     this.start = nodeOrToken.start;
     this.end = nodeOrToken.end;
@@ -191,10 +232,12 @@ export class CompileError extends Error {
   }
 }
 
-export class CompileWarning extends Error {
+export class CompileWarning extends Error implements CompileDiagnostic {
   code: Readonly<CompileErrorCode>;
 
   diagnostic: Readonly<string>;
+
+  details?: Readonly<CompileDetails>;
 
   nodeOrToken: Readonly<SyntaxNode | SyntaxToken>;
 
@@ -202,10 +245,11 @@ export class CompileWarning extends Error {
 
   end: Readonly<number>;
 
-  constructor (code: number, message: string, nodeOrToken: SyntaxNode | SyntaxToken) {
+  constructor (code: number, message: string, nodeOrToken: SyntaxNode | SyntaxToken, details?: CompileDetails) {
     super(message);
     this.code = code;
     this.diagnostic = message;
+    this.details = details;
     this.nodeOrToken = nodeOrToken;
     this.start = nodeOrToken.start;
     this.end = nodeOrToken.end;
@@ -218,16 +262,12 @@ export class CompileWarning extends Error {
   }
 }
 
-export interface QuickFix {
-  title: string;
-  filepath: Filepath;
-  edits: TextEdit[];
-}
-
-export class CompileInfo extends Error {
+export class CompileInfo extends Error implements CompileDiagnostic {
   code: Readonly<CompileErrorCode>;
 
   diagnostic: Readonly<string>;
+
+  details?: Readonly<CompileDetails>;
 
   nodeOrToken: Readonly<SyntaxNode | SyntaxToken>;
 
@@ -235,23 +275,25 @@ export class CompileInfo extends Error {
 
   end: Readonly<number>;
 
-  quickFixes?: QuickFix[];
-
   constructor (
     code: number,
     message: string,
     nodeOrToken: SyntaxNode | SyntaxToken,
-    options?: { quickFixes?: QuickFix[] },
+    details?: CompileDetails,
   ) {
     super(message);
     this.code = code;
     this.diagnostic = message;
+    this.details = details;
     this.nodeOrToken = nodeOrToken;
     this.start = nodeOrToken.start;
     this.end = nodeOrToken.end;
-    this.quickFixes = options?.quickFixes;
     this.name = this.constructor.name;
     Object.setPrototypeOf(this, CompileInfo.prototype);
+  }
+
+  get quickFixes (): QuickFix[] | undefined {
+    return this.details?.quickFixes;
   }
 
   get filepath (): Filepath {

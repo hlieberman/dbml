@@ -15,9 +15,9 @@ describe('[example - record] auto-increment and serial type constraints', () => 
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(0);
+    expect(infos.length).toBe(0);
 
     const db = result.getValue()!;
     // Verify complete records array
@@ -77,9 +77,9 @@ describe('[example - record] auto-increment and serial type constraints', () => 
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
-    expect(warnings.length).toBe(0);
+    expect(infos.length).toBe(0);
 
     const db = result.getValue()!;
     // Verify complete records array
@@ -128,8 +128,8 @@ describe('[example - record] auto-increment and serial type constraints', () => 
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
-    expect(warnings.length).toBe(0);
+    const infos = result.getInfos();
+    expect(infos.length).toBe(0);
 
     const db = result.getValue()!;
     // Verify complete records array
@@ -179,10 +179,10 @@ describe('[example - record] auto-increment and serial type constraints', () => 
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
     // Auto-increment PK skips duplicate check entirely
-    expect(warnings.length).toBe(0);
+    expect(infos.length).toBe(0);
   });
 
   test('should detect duplicate pk with not null + dbdefault', () => {
@@ -197,11 +197,11 @@ describe('[example - record] auto-increment and serial type constraints', () => 
       }
     `;
     const result = interpret(source);
-    const warnings = result.getWarnings();
+    const infos = result.getInfos();
 
     // Both NULLs resolve to default value 1, which is a duplicate
-    expect(warnings.length).toBe(2);
-    expect(warnings[0].diagnostic).toBe('Duplicate PK: users.id = null');
-    expect(warnings[1].diagnostic).toBe('Duplicate PK: users.id = null');
+    expect(infos.length).toBe(2);
+    expect(infos[0].diagnostic).toBe('Duplicate PK: `users.id` = `null`');
+    expect(infos[1].diagnostic).toBe('Duplicate PK: `users.id` = `null`');
   });
 });

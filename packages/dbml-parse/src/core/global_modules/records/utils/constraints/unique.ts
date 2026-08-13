@@ -2,17 +2,17 @@ import {
   compact, filter, flatMap, groupBy, isEmpty, keyBy,
 } from 'lodash-es';
 import type Compiler from '@/compiler/index';
-import type { CompileWarning } from '@/core/types/errors';
+import type { CompileInfo } from '@/core/types/errors';
 import type {
   Index,
   RecordValue,
   TableRecord,
 } from '@/core/types/schemaJson';
 import { TableSymbol, type ColumnSymbol } from '@/core/types/symbol';
+import { recordsUniqueDuplicate } from '@/core/utils/diagnostics_reporter';
 import {
-  createConstraintWarning,
+  resolveRecordValueNode,
   extractKeyValueWithDefault,
-  formatFullColumnNames,
   formatValues,
   getDiagnosticAnchorValues,
   hasNullWithoutDefaultInKey,
@@ -20,7 +20,7 @@ import {
 } from './helper';
 
 // Validate unique constraints for a table's records.
-export function validateUnique (compiler: Compiler, tableSymbol: TableSymbol, record: TableRecord): CompileWarning[] {
+export function validateUnique (compiler: Compiler, tableSymbol: TableSymbol, record: TableRecord): CompileInfo[] {
   if (isEmpty(record.values)) return [];
 
   const rows = toKeyedRows(record);
@@ -66,7 +66,7 @@ function checkUniqueDuplicates (
   tableSymbol: TableSymbol,
   uniqueColumnSymbols: ColumnSymbol[],
   rows: Record<string, RecordValue>[],
-): CompileWarning[] {
+): CompileInfo[] {
   const uniqueColumnNames = uniqueColumnSymbols.map((c) => c.name ?? '');
 
   // Filter out rows with NULL values (SQL standard: NULLs don't conflict in UNIQUE constraints)
@@ -82,23 +82,11 @@ function checkUniqueDuplicates (
   // Find groups with more than 1 row (duplicates)
   const duplicateGroups = filter(rowsByKeyValue, (group) => group.length > 1);
 
-  // Transform duplicate groups to warnings
-  return flatMap(duplicateGroups, (duplicateRows) => {
-    const constraintType = uniqueColumnSymbols.length > 1 ? 'Composite UNIQUE' : 'UNIQUE';
-
-    const columnRef = formatFullColumnNames(
-      tableSymbol.schema(compiler),
-      tableSymbol.name ?? '',
-      uniqueColumnNames,
-    );
-
-    return flatMap(duplicateRows, (row) => {
+  return flatMap(duplicateGroups, (duplicateRows) =>
+    flatMap(duplicateRows, (row) => {
       const valueStr = formatValues(compiler, row, uniqueColumnSymbols);
-      const message = `Duplicate ${constraintType}: ${columnRef} = ${valueStr}`;
-
-      // Generate diagnostics for every anchor nodes
       return getDiagnosticAnchorValues(row, uniqueColumnNames)
-        .map((v) => createConstraintWarning(compiler, v, message));
-    });
-  });
+        .map((v) => recordsUniqueDuplicate(compiler, resolveRecordValueNode(compiler, v), { table: tableSymbol, columns: uniqueColumnSymbols, valueStr }));
+    }),
+  );
 }

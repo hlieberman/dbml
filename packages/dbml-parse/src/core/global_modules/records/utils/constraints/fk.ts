@@ -1,6 +1,6 @@
 import { compact, flatMap, isEmpty } from 'lodash-es';
 import type Compiler from '@/compiler/index';
-import type { CompileWarning } from '@/core/types/errors';
+import type { CompileInfo } from '@/core/types/errors';
 import type { Filepath } from '@/core/types/filepath';
 import type { SyntaxNode } from '@/core/types/nodes';
 import { parseCardinality } from '@/core/types/relation';
@@ -9,9 +9,12 @@ import type { Ref, TableRecord } from '@/core/types/schemaJson';
 import type { TableSymbol } from '@/core/types/symbol';
 import type { ColumnSymbol, InternedNodeSymbol } from '@/core/types/symbol/symbols';
 import {
-  createConstraintWarning,
+  recordsFkNull,
+  recordsFkNotFound,
+} from '@/core/utils/diagnostics_reporter';
+import {
+  resolveRecordValueNode,
   extractKeyValueWithDefault,
-  formatFullColumnNames,
   formatValues,
   getDiagnosticAnchorValues,
   hasNullWithoutDefaultInKey,
@@ -46,7 +49,7 @@ export function validateForeignKeys (
   allRefs: Ref[],
   allRecords: Map<InternedNodeSymbol, TableInfo>,
   filepath: Filepath,
-): CompileWarning[] {
+): CompileInfo[] {
   const tableInfoLookup = buildTableInfoLookup(allRecords, compiler, filepath);
 
   // Pre-filter: only validate refs where at least one endpoint has records
@@ -75,7 +78,7 @@ function validateForeignKey (
   ref: Ref, // The constraint to validate
   tableInfoLookup: Map<string, TableInfo>, // Fast info lookup
   filepath: Filepath,
-): CompileWarning[] {
+): CompileInfo[] {
   if (!ref.endpoints) return [];
 
   const [
@@ -124,7 +127,7 @@ function validateEndpoint (
   leftCard: RelationCardinality,
   rightCard: RelationCardinality, // This will constrains the left table's records
   filepath: Filepath,
-): CompileWarning[] {
+): CompileInfo[] {
   if (!leftTable.record || isEmpty(leftTable.record.values)) return [];
 
   const { min: leftMin, max: leftMax } = parseCardinality(leftCard);
@@ -144,20 +147,22 @@ function validateEndpoint (
     rightRows.map((row) => extractKeyValueWithDefault(compiler, row, rightEndpoint)),
   );
 
-  const leftName = leftTable.tableSymbol.interpretedName(compiler, filepath);
-  const rightName = rightTable.tableSymbol.interpretedName(compiler, filepath);
+  const fkOptions = {
+    leftTable: leftTable.tableSymbol,
+    leftColumns: leftEndpoint,
+    rightTable: rightTable.tableSymbol,
+    rightColumns: rightEndpoint,
+    filepath,
+  };
 
   return flatMap(leftRows, (row) => {
     const isNull = hasNullWithoutDefaultInKey(compiler, row, leftEndpoint);
 
     if (isNull) {
       if (allowNull) return [];
-      const leftColumnRef = formatFullColumnNames(leftName.schema, leftName.name, leftColumnNames);
       const valueStr = formatValues(compiler, row, leftEndpoint);
-      const message = `FK violation: ${leftColumnRef} = ${valueStr} must not be null`;
-
       return getDiagnosticAnchorValues(row, leftColumnNames)
-        .map((v) => createConstraintWarning(compiler, v, message));
+        .map((v) => recordsFkNull(compiler, resolveRecordValueNode(compiler, v), { ...fkOptions, valueStr }));
     }
 
     // right max = 1 -> non-null left value must map to exactly 1 right row
@@ -168,11 +173,8 @@ function validateEndpoint (
     const fkValue = extractKeyValueWithDefault(compiler, row, leftEndpoint);
     if (validFkValues.has(fkValue)) return [];
 
-    const leftColumnRef = formatFullColumnNames(leftName.schema, leftName.name, leftColumnNames);
-    const rightColumnRef = formatFullColumnNames(rightName.schema, rightName.name, rightColumnNames);
     const valueStr = formatValues(compiler, row, leftEndpoint);
-    const message = `FK violation: ${leftColumnRef} = ${valueStr} does not exist in ${rightColumnRef}`;
     return getDiagnosticAnchorValues(row, leftColumnNames)
-      .map((v) => createConstraintWarning(compiler, v, message));
+      .map((v) => recordsFkNotFound(compiler, resolveRecordValueNode(compiler, v), { ...fkOptions, valueStr }));
   });
 }
