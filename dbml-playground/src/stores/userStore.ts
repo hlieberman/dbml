@@ -12,7 +12,6 @@ export enum OutputTabId {
 
 export interface UserPreferences {
   isVim: boolean;
-  showDiagnosticsPopover: boolean;
   activeOutputTab: OutputTabId;
   panelSizes: number[];
 }
@@ -21,7 +20,6 @@ const STORAGE_KEY = 'USER_DATA';
 
 const defaults: UserPreferences = {
   isVim: false,
-  showDiagnosticsPopover: true,
   activeOutputTab: OutputTabId.Nodes,
   panelSizes: [15, 42, 43],
 };
