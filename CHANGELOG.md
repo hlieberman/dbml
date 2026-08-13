@@ -1,3 +1,12 @@
+## v10.1.0 (2026-08-13)
+
+#### :rocket: New Feature
+* `dbml-cli`, `dbml-connector`, `dbml-core`, `dbml-parse`
+  * [#956](https://github.com/holistics/dbml/pull/956) Fix/improve diagnostics ([@huydo862003](https://github.com/huydo862003))
+
+#### Committers: 1
+- Huy Do Nguyen An ([@huydo862003](https://github.com/huydo862003))
+
 ## v10.0.0 (2026-08-10)
 
 #### :bug: Bug Fix
