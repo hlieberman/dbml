@@ -1,7 +1,7 @@
 import { Compiler, DEFAULT_ENTRY, MemoryProjectLayout } from '@dbml/parse';
 import type {
   DiagramViewSyncOperation, DiagramViewBlock, TextEdit,
-  DepSyncOperation, DepBlock, ElementIdentifier, TableIdentifier,
+  DepSyncOperation, ElementIdentifier, TableIdentifier,
 } from '@dbml/parse';
 
 export { findDiagramViewBlocks, findDepBlocks } from '@dbml/parse';
@@ -28,12 +28,11 @@ export function syncDiagramView (
 export function syncDep (
   dbmlCode: string,
   operations: DepSyncOperation[],
-  blocks?: DepBlock[],
 ): { newDbml: string; edits: TextEdit[] } {
   const layout = new MemoryProjectLayout();
   layout.setSource(DEFAULT_ENTRY, dbmlCode);
   const compiler = new Compiler(layout);
-  return compiler.syncDep(DEFAULT_ENTRY, operations, blocks);
+  return compiler.syncDep(DEFAULT_ENTRY, operations);
 }
 
 export function updateElementSettingEdit (

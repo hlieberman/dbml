@@ -1,13 +1,13 @@
 /**
  * Dep block transform - read and write `Dep` blocks in DBML source.
  *
- * Parallel to {@link ./syncDiagramView.ts}, but a Dep block has no name to
- * key on - a block is identified by its edge endpoints (upstream/downstream
- * schema + table + fields). The color picker uses this to write a dep's
+ * Parallel to {@link ./syncDiagramView.ts}, but a Dep block has no name to key on,
+ * so a write is aimed at an edge and {@link findDepDefinition} finds the block or the
+ * inline `[dep: …]` setting carrying it. The color picker uses this to write a dep's
  * `[color]`:
  *   - `update` an existing block's `[color]`, or
  *   - `create` a direct `Dep { a -> b } [color: <hex>]` when the picked
- *     (table-level) line has no backing block, or
+ *     (table-level) line has no direct block, or
  *   - `remove` an existing block's `[color]` so the dep falls back to its
  *     upstream -> group -> grey default.
  * `create` treats an already-matching block as an `update`, so it never
@@ -31,7 +31,8 @@ import {
 } from '@/core/types/nodes';
 import { destructureComplexVariable, extractSettingName } from '@/core/utils/expression';
 import type Compiler from '../../index';
-import { endpointMatches, formatEndpoint } from './utils';
+import { formatEndpoint, findDepDefinition } from './utils';
+import type { DepDefinition } from './utils';
 import { TextEdit, applyTextEdits } from './applyTextEdits';
 import { updateNoteEdit, removeNoteEdit, addNoteEdit } from '@/core/utils/note';
 import { updateSettingEdit, removeSettingEdit } from '@/core/utils/setting';
@@ -80,19 +81,15 @@ export function syncDep (
   this: Compiler,
   filepath: Filepath,
   operations: DepSyncOperation[],
-  blocks?: DepBlock[],
 ): {
   newDbml: string;
   edits: TextEdit[];
 } {
   const dbml = this.getSource(filepath) ?? '';
-  const program = this.parseFile(filepath).getValue().ast;
-  const originalBlocks = blocks ?? depBlocksFromProgram(program);
-  const inlineDeps = inlineDepsFromProgram(dbml, program);
   const allEdits: TextEdit[] = [];
 
   for (const op of operations) {
-    allEdits.push(...applyOperation(dbml, op, originalBlocks, inlineDeps));
+    allEdits.push(...applyOperation(this, filepath, dbml, op));
   }
 
   allEdits.sort((a, b) => b.start - a.start);
@@ -270,69 +267,55 @@ function extractInlineDepEdges (field: FunctionApplicationNode, host: DepEndpoin
   return edges;
 }
 
-function edgesMatch (candidate: DepSyncEdge, target: DepSyncEdge): boolean {
-  return endpointMatches(candidate.upstream, target.upstream) && endpointMatches(candidate.downstream, target.downstream);
-}
-
-function blockHasEdge (block: DepBlock, edge: DepSyncEdge): boolean {
-  return block.edges.some((e) => edgesMatch(e, edge));
-}
-
-function findBlockForEdge (blocks: DepBlock[], edge: DepSyncEdge): DepBlock | undefined {
-  return blocks.find((b) => blockHasEdge(b, edge));
-}
-
 /** Dispatch a single sync operation to the appropriate edit strategy. */
-function applyOperation (dbml: string, operation: DepSyncOperation, blocks: DepBlock[], inlineDeps: InlineDep[]): TextEdit[] {
+function applyOperation (compiler: Compiler, filepath: Filepath, dbml: string, operation: DepSyncOperation): TextEdit[] {
+  const definition = findDepDefinition(compiler, filepath, operation.edge);
+
   switch (operation.operation) {
     case 'create':
-      return computeCreateEdit(dbml, operation, blocks, inlineDeps);
-    case 'update': {
-      const block = findBlockForEdge(blocks, operation.edge);
-      return block ? computeUpdateEdit(operation, block, dbml) : [];
-    }
-    case 'remove': {
-      const block = findBlockForEdge(blocks, operation.edge);
-      return block ? computeUpdateEdit({ ...operation, color: undefined, note: undefined }, block, dbml) : [];
-    }
+      return computeCreateEdit(dbml, operation, definition);
+    case 'update':
+      return definition?.kind === 'block' ? computeUpdateEdit(operation, definition.declaration, dbml) : [];
+    case 'remove':
+      return definition?.kind === 'block'
+        ? computeUpdateEdit({ ...operation, color: undefined, note: undefined }, definition.declaration, dbml)
+        : [];
     default:
       return [];
   }
 }
 
 /** Compute edits to update an existing block's color and/or note. */
-function computeUpdateEdit (operation: DepSyncOperation, block: DepBlock, source: string): TextEdit[] {
+function computeUpdateEdit (operation: DepSyncOperation, declaration: ElementDeclarationNode, source: string): TextEdit[] {
   const edits: TextEdit[] = [];
 
   if (operation.color !== undefined) {
-    const edit = updateSettingEdit(block.declaration, SettingName.Color, operation.color, source);
+    const edit = updateSettingEdit(declaration, SettingName.Color, operation.color, source);
     if (edit) edits.push(edit);
   }
 
   if (operation.note === null) {
-    const edit = removeNoteEdit(block.declaration);
+    const edit = removeNoteEdit(declaration);
     if (edit) edits.push(edit);
   } else if (operation.note !== undefined) {
-    const edit = updateNoteEdit(block.declaration, operation.note) ?? addNoteEdit(block.declaration, operation.note);
+    const edit = updateNoteEdit(declaration, operation.note) ?? addNoteEdit(declaration, operation.note);
     if (edit) edits.push(edit);
   }
 
   return edits;
 }
 
-/** Compute edits to create a new Dep block (or update if one already matches). */
-function computeCreateEdit (dbml: string, operation: DepSyncOperation, blocks: DepBlock[], inlineDeps: InlineDep[]): TextEdit[] {
-  const existing = findBlockForEdge(blocks, operation.edge);
-  if (existing) return computeUpdateEdit(operation, existing, dbml);
+/** Compute edits to create a new Dep block (or update if one already carries the edge). */
+function computeCreateEdit (dbml: string, operation: DepSyncOperation, definition: DepDefinition | undefined): TextEdit[] {
+  if (definition?.kind === 'block') return computeUpdateEdit(operation, definition.declaration, dbml);
 
   const newBlock = generateDepBlock(operation.edge, operation.color ?? '');
   const createEdit: TextEdit = { start: dbml.length, end: dbml.length, newText: '\n\n' + newBlock + '\n' };
 
   // If the edge is authored inline, strip the inline setting to avoid duplication.
-  const inline = inlineDeps.find((d) => edgesMatch(d.edge, operation.edge));
-  if (inline) {
+  if (definition?.kind === 'inline') {
     return [
-      { start: inline.fullStart, end: inline.fullEnd, newText: '' },
+      { start: definition.fullStart, end: definition.fullEnd, newText: '' },
       createEdit,
     ];
   }

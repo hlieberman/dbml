@@ -7,32 +7,15 @@ import { addDoubleQuoteIfNeeded, splitQualifiedIdentifier } from '../../utils';
 import type { EndpointRef } from '../types';
 export type { ElementIdentifier } from '../types';
 export { findRefDefinition, type InlineRef, type StandaloneRef } from './ref';
+export {
+  findDepDefinition,
+  type DepDefinition,
+  type InlineDepDefinition,
+  type BlockDepDefinition,
+} from './dep';
 
 export function normalizeSchema (schema?: string | null): string {
   return schema && schema.length > 0 ? schema : DEFAULT_SCHEMA_NAME;
-}
-
-export function endpointsEqual (left: EndpointRef, right: EndpointRef): boolean {
-  if (normalizeSchema(left.schemaName) !== normalizeSchema(right.schemaName))
-    return false;
-  if (left.tableName !== right.tableName) return false;
-  const leftFieldNames = left.fieldNames ?? [];
-  const rightFieldNames = right.fieldNames ?? [];
-  if (leftFieldNames.length !== rightFieldNames.length) return false;
-  return leftFieldNames.every((leftField, i) => leftField === rightFieldNames[i]);
-}
-
-export function endpointMatches (
-  candidate: EndpointRef,
-  target: EndpointRef,
-): boolean {
-  if (normalizeSchema(candidate.schemaName) !== normalizeSchema(target.schemaName)) return false;
-  if (candidate.tableName !== target.tableName) return false;
-  const targetFieldNames = target.fieldNames ?? [];
-  if (targetFieldNames.length === 0) return true;
-  const candidateFieldNames = candidate.fieldNames ?? [];
-  if (candidateFieldNames.length !== targetFieldNames.length) return false;
-  return candidateFieldNames.every((f, i) => f === targetFieldNames[i]);
 }
 
 export function normalizeTableName (

@@ -289,33 +289,38 @@ Table b {
 });
 
 describe('updateElementSetting - inline dep', () => {
-  const dep = (up: string, down: string): ElementIdentifier => ({
+  // An inline `[dep: -> b.id]` on a.id is the edge a.id -> b.id, so its identity carries both fields
+  const dep = (upTable: string, upField: string, downTable: string, downField: string): ElementIdentifier => ({
     kind: MetadataKind.Dep,
-    upstream: { tableName: up },
-    downstream: { tableName: down },
+    upstream: { tableName: upTable, fieldNames: [upField] },
+    downstream: { tableName: downTable, fieldNames: [downField] },
   });
 
-  it('extracts inline dep to standalone when adding a setting', () => {
-    const dbml = `Table a {
-  id int [dep: -> b]
+  const INLINE = `Table a {
+  id int [dep: -> b.id]
 }
 Table b {
   id int
 }`;
-    const result = update(dbml, dep('a', 'b'), 'color', '#FF0000');
-    expect(result).not.toContain('[dep: -> b]');
+
+  it('extracts inline dep to standalone when adding a setting', () => {
+    const result = update(INLINE, dep('a', 'id', 'b', 'id'), 'color', '#FF0000');
+    expect(result).not.toContain('[dep: -> b.id]');
     expect(result).toContain('color: #FF0000');
-    expect(result).toContain('a -> b');
+    expect(result).toContain('a.id -> b.id');
   });
 
   it('does nothing when removing a setting from an inline dep', () => {
-    const dbml = `Table a {
-  id int [dep: -> b]
-}
-Table b {
-  id int
-}`;
-    const result = update(dbml, dep('a', 'b'), 'color', null);
-    expect(result).toBe(dbml);
+    const result = update(INLINE, dep('a', 'id', 'b', 'id'), 'color', null);
+    expect(result).toBe(INLINE);
+  });
+
+  it('does nothing when the target is table-level and the inline dep is not', () => {
+    const result = update(INLINE, {
+      kind: MetadataKind.Dep,
+      upstream: { tableName: 'a' },
+      downstream: { tableName: 'b' },
+    } as ElementIdentifier, 'color', '#FF0000');
+    expect(result).toBe(INLINE);
   });
 });
