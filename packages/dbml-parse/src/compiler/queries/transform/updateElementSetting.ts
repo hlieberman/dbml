@@ -6,10 +6,9 @@ import { applyTextEdits, type TextEdit } from './applyTextEdits';
 import { updateSettingEdit } from '@/core/utils/setting';
 import type { ElementIdentifier, DepIdentifier, RefIdentifier } from './types';
 import {
-  endpointsEqual, endpointMatches, lookupElementSymbol,
-  formatEndpoint, formatSetting, findRefDefinition,
+  lookupElementSymbol,
+  formatEndpoint, formatSetting, findRefDefinition, findDepDefinition,
 } from './utils';
-import { depBlocksFromProgram, inlineDepsFromProgram } from './syncDep';
 import { FunctionApplicationNode, type SyntaxNode } from '@/core/types/nodes';
 
 export function updateElementSettingEdit (
@@ -75,18 +74,11 @@ function findNamedElementDeclaration (compiler: Compiler, filepath: Filepath, ta
 
 function updateDepSettingEdit (compiler: Compiler, filepath: Filepath, target: DepIdentifier, settingName: string, value: string | null | undefined): TextEdit[] {
   const source = compiler.getSource(filepath) ?? '';
-  const program = compiler.parseFile(filepath).getValue().ast;
-  const block = depBlocksFromProgram(program).find((b) =>
-    b.edges.some((e) => endpointsEqual(e.upstream, target.upstream) && endpointsEqual(e.downstream, target.downstream)),
-  );
+  const definition = findDepDefinition(compiler, filepath, target);
+  if (!definition) return [];
 
-  if (!block) {
+  if (definition.kind === 'inline') {
     if (value === null) return [];
-
-    const inline = inlineDepsFromProgram(source, program).find((d) =>
-      endpointMatches(d.edge.upstream, target.upstream) && endpointMatches(d.edge.downstream, target.downstream),
-    );
-    if (!inline) return [];
 
     const up = formatEndpoint(target.upstream);
     const down = formatEndpoint(target.downstream);
@@ -96,12 +88,12 @@ function updateDepSettingEdit (compiler: Compiler, filepath: Filepath, target: D
       ? `Dep [${setting}] {\n  ${up} -> ${down}\n}`
       : `Dep {\n  ${up} -> ${down}\n}`;
     return [
-      { start: inline.fullStart, end: inline.fullEnd, newText: '' },
+      { start: definition.fullStart, end: definition.fullEnd, newText: '' },
       { start: source.length, end: source.length, newText: '\n\n' + depBlock + '\n' },
     ];
   }
 
-  const { declaration } = block;
+  const { declaration } = definition;
   const { body } = declaration;
 
   if (body instanceof FunctionApplicationNode) {

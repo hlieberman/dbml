@@ -9,7 +9,6 @@ import {
   syncDiagramView,
   findDiagramViewBlocks,
   syncDep,
-  findDepBlocks,
 } from './transform';
 export {
   renameTable,
@@ -18,7 +17,6 @@ export {
   syncDiagramView,
   findDiagramViewBlocks,
   syncDep,
-  findDepBlocks,
   importer,
   exporter,
   ModelExporter,
@@ -78,7 +76,6 @@ export type {
   DepSyncOperation,
   DepSyncEdge,
   DepEndpointRef,
-  DepBlock,
   TextEdit,
   ElementIdentifier,
   SchemaIdentifier,

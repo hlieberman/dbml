@@ -115,11 +115,11 @@ export type {
   TextEdit,
 } from '@/compiler/queries/transform';
 
-export { findDiagramViewBlocks, findDepBlocks } from '@/compiler/queries/transform';
+export { findDiagramViewBlocks } from '@/compiler/queries/transform';
 
 // Dep transform types
 export type {
-  DepSyncOperation, DepSyncEdge, DepEndpointRef, DepBlock,
+  DepSyncOperation, DepSyncEdge, DepEndpointRef,
 } from '@/compiler/queries/transform';
 
 // Element identifier types

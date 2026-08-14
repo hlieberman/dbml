@@ -8,12 +8,10 @@ export {
 } from './syncDiagramView';
 export {
   syncDep,
-  findDepBlocks,
   generateDepBlock,
   type DepSyncOperation,
   type DepSyncEdge,
   type DepEndpointRef,
-  type DepBlock,
 } from './syncDep';
 export { applyTextEdits, type TextEdit } from './applyTextEdits';
 export type {

@@ -1,6 +1,6 @@
 import type {
   DiagramViewSyncOperation, DiagramViewBlock, TextEdit,
-  DepSyncOperation, DepBlock, ElementIdentifier, TableIdentifier,
+  DepSyncOperation, ElementIdentifier, TableIdentifier,
 } from '@dbml/parse';
 
 export function renameTable(
@@ -36,9 +36,4 @@ export function findDiagramViewBlocks(
 export function syncDep(
   dbmlCode: string,
   operations: DepSyncOperation[],
-  blocks?: DepBlock[],
 ): { newDbml: string; edits: TextEdit[] };
-
-export function findDepBlocks(
-  dbmlCode: string,
-): DepBlock[];

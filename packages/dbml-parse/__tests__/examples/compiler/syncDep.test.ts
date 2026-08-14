@@ -127,25 +127,21 @@ Dep {
     expect(db.deps[0].color).toBe('#abcabc');
   });
 
-  it('matches a table-level edge to a column-level block (implicit table dep)', () => {
+  it('leaves a column-level block alone when the target is table-level', () => {
     const dbml = `${PRELUDE}
 Dep {
   a.id -> b.id
 }`;
-    const { newDbml } = syncDep(dbml, [
+    const { newDbml, edits } = syncDep(dbml, [
       { operation: 'update', edge: tableEdge('a', 'b'), color: '#1abc9c' },
     ]);
-    expect(newDbml).toContain('[color: #1abc9c]');
-    // Should update in place, not create a duplicate
-    expect(newDbml.match(/Dep/g)?.length).toBe(1);
-    const db = interpret(newDbml).getValue()!;
-    expect(db.deps).toHaveLength(1);
-    expect(db.deps[0].color).toBe('#1abc9c');
+    expect(edits).toHaveLength(0);
+    expect(newDbml).toBe(dbml);
   });
 });
 
-describe('syncDep - create with table-level edge matching column-level block', () => {
-  it('treats an existing column-level block as an update when creating with a table-level edge', () => {
+describe('syncDep - create with a table-level edge beside a column-level block', () => {
+  it('creates the direct block rather than colouring the column-level one', () => {
     const dbml = `${PRELUDE}
 Dep {
   a.id -> b.id
@@ -153,12 +149,89 @@ Dep {
     const { newDbml } = syncDep(dbml, [
       { operation: 'create', edge: tableEdge('a', 'b'), color: '#ff5733' },
     ]);
-    // Should update existing block, not create a new one
-    expect(newDbml.match(/Dep/g)?.length).toBe(1);
-    expect(newDbml).toContain('[color: #ff5733]');
+    expect(newDbml).toContain('Dep [color: #ff5733] {');
+    expect(newDbml).toContain('a -> b');
+    const db = interpret(newDbml).getValue()!;
+    expect(db.deps).toHaveLength(2);
+    const direct = db.deps.find((d) => d.edges[0].upstream.fieldNames.length === 0);
+    const columnLevel = db.deps.find((d) => d.edges[0].upstream.fieldNames.length === 1);
+    expect(direct?.color).toBe('#ff5733');
+    expect(columnLevel?.color).toBeUndefined();
+  });
+});
+
+describe('syncDep - mixed-level edges', () => {
+  const mixedEdge = (): DepSyncOperation['edge'] => ({
+    upstream: { tableName: 'a', fieldNames: ['id'] },
+    downstream: { tableName: 'b', fieldNames: [] },
+  });
+
+  const MIXED = `${PRELUDE}
+Dep {
+  a.id -> b
+}`;
+
+  it('colors the block carrying the edge', () => {
+    const { newDbml } = syncDep(MIXED, [
+      { operation: 'create', edge: mixedEdge(), color: '#0055ff' },
+    ]);
     const db = interpret(newDbml).getValue()!;
     expect(db.deps).toHaveLength(1);
-    expect(db.deps[0].color).toBe('#ff5733');
+    expect(db.deps[0].color).toBe('#0055ff');
+  });
+
+  it('notes the block carrying the edge', () => {
+    const { newDbml } = syncDep(MIXED, [
+      { operation: 'update', edge: mixedEdge(), note: 'from etl' },
+    ]);
+    const db = interpret(newDbml).getValue()!;
+    expect(db.deps).toHaveLength(1);
+    expect(db.deps[0].note?.value).toBe('from etl');
+  });
+
+  it('leaves one block after repeated picks', () => {
+    const first = syncDep(MIXED, [
+      { operation: 'create', edge: mixedEdge(), color: '#0055ff' },
+    ]).newDbml;
+    const second = syncDep(first, [
+      { operation: 'create', edge: mixedEdge(), color: '#ff0055' },
+    ]).newDbml;
+    const db = interpret(second).getValue()!;
+    expect(db.deps).toHaveLength(1);
+    expect(db.deps[0].color).toBe('#ff0055');
+  });
+
+  it('tells a schema-qualified table apart from a table column', () => {
+    const dbml = `
+Table s.a { id int }
+Table a { id int }
+Table b { id int }
+
+Dep {
+  s.a -> b
+}
+
+Dep {
+  a.id -> b
+}`;
+    const { newDbml } = syncDep(dbml, [
+      {
+        operation: 'create',
+        edge: { upstream: { schemaName: 's', tableName: 'a', fieldNames: [] }, downstream: { tableName: 'b', fieldNames: [] } },
+        color: '#111111',
+      },
+      {
+        operation: 'create',
+        edge: mixedEdge(),
+        color: '#222222',
+      },
+    ]);
+    const db = interpret(newDbml).getValue()!;
+    expect(db.deps).toHaveLength(2);
+    const schemaLevel = db.deps.find((d) => d.edges[0].upstream.fieldNames.length === 0);
+    const columnLevel = db.deps.find((d) => d.edges[0].upstream.fieldNames.length === 1);
+    expect(schemaLevel?.color).toBe('#111111');
+    expect(columnLevel?.color).toBe('#222222');
   });
 });
 
