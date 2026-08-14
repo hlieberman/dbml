@@ -1,3 +1,12 @@
+## v10.1.1 (2026-08-14)
+
+#### :bug: Bug Fix
+* `dbml-cli`, `dbml-connector`, `dbml-core`, `dbml-parse`
+  * [#958](https://github.com/holistics/dbml/pull/958) Resolve a dep block through the symbol table ([@NQPhuc](https://github.com/NQPhuc))
+
+#### Committers: 1
+- NQPhuc ([@NQPhuc](https://github.com/NQPhuc))
+
 ## v10.1.0 (2026-08-13)
 
 #### :rocket: New Feature
