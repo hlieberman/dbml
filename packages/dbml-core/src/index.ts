@@ -10,7 +10,6 @@ import {
   syncDiagramView,
   findDiagramViewBlocks,
   syncDep,
-  findDepBlocks,
 } from './transform';
 import { VERSION } from './utils/version';
 
@@ -23,7 +22,6 @@ export {
   syncDiagramView,
   findDiagramViewBlocks,
   syncDep,
-  findDepBlocks,
   ModelExporter,
   CompilerError,
   Parser,
@@ -80,7 +78,6 @@ export type {
   DepSyncOperation,
   DepSyncEdge,
   DepEndpointRef,
-  DepBlock,
   TextEdit,
   ElementIdentifier,
   SchemaIdentifier,

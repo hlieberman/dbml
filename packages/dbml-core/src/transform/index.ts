@@ -4,7 +4,7 @@ import type {
   DepSyncOperation, ElementIdentifier, TableIdentifier,
 } from '@dbml/parse';
 
-export { findDiagramViewBlocks, findDepBlocks } from '@dbml/parse';
+export { findDiagramViewBlocks } from '@dbml/parse';
 
 export function renameTable (oldName: string | TableIdentifier, newName: string | TableIdentifier, dbmlCode: string): string {
   const layout = new MemoryProjectLayout();
