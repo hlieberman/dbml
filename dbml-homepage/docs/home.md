@@ -167,3 +167,4 @@ DBML is created and maintained by [Holistics](https://holistics.io?utm_source=db
 * [C# parser for Dbml by Niels Bosma](https://github.com/Ivy-Interactive/Ivy.Dbml.Parser)
 * [Scafoldr: DBML-Powered Code Scaffolding Tool](https://scafoldr.com/code-generator)
 * [Jetbrains IDEs (Intellij/PyCharm/Datagrip etc.) Plugin for DBML by LiamClarkeNZ](https://plugins.jetbrains.com/plugin/30905-dbml)
+* [dbmlgraph: Generate LLM-ready markdown docs and search a DBML schema from the CLI by Verry Anto Paulus](https://github.com/verryp/dbmlgraph)
