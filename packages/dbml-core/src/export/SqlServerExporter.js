@@ -68,7 +68,7 @@ class SqlServerExporter {
 
       if (field.enumId) {
         const _enum = model.enums[field.enumId];
-        line = `[${field.name}] nvarchar(255) NOT NULL CHECK ([${field.name}] IN (`;
+        line = `[${field.name}] nvarchar(255) CHECK ([${field.name}] IN (`;
         const enumValues = _enum.valueIds.map((valueId) => {
           const value = model.enumValues[valueId];
           return `'${value.name}'`;

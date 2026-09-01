@@ -137,7 +137,7 @@ class OracleExporter {
         });
 
         const enumString = enumValues.join(', ');
-        line += ` nvarchar2(255) NOT NULL CHECK (${fieldName} IN (${enumString}))`;
+        line += ` nvarchar2(255) CHECK (${fieldName} IN (${enumString}))`;
       } else {
         line += ` ${field.type.type_name}`;
       }
